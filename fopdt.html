@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First-Order + Dead Time — PDC Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <i class="fas fa-wave-square"></i>
+            <span>PDC Lab</span>
+        </a>
+        <div class="nav-institution">
+            <span class="ni-lab">PSE Lab</span>
+            <span class="ni-school">Amirkabir University of Technology (Tehran's Polytechnic)</span>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="pid-tank.html">PID Tank</a>
+            <a href="fopdt.html" class="active">FOPDT</a>
+            <a href="second-order.html">2nd Order</a>
+        </div>
+    </nav>
+
+    <div class="example-page">
+        <div class="page-header">
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <h1><i class="fas fa-wave-square" style="color:#f43f5e;"></i> First-Order Plus Dead Time</h1>
+            <p>Explore how gain, time constant, and dead time shape step responses of FOPDT process models.</p>
+        </div>
+
+        <div class="page-layout">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h3>System Parameters</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">K — Process Gain</span>
+                            <span class="slider-value" id="gain-val">2.0</span>
+                        </div>
+                        <input type="range" id="gain" min="0.1" max="10" step="0.1" value="2.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">τ — Time Constant (s)</span>
+                            <span class="slider-value" id="tau-val">3.0</span>
+                        </div>
+                        <input type="range" id="tau" min="0.5" max="20" step="0.1" value="3.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">θ — Dead Time (s)</span>
+                            <span class="slider-value" id="theta-val">1.0</span>
+                        </div>
+                        <input type="range" id="theta" min="0" max="10" step="0.1" value="1.0">
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Input Settings</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Step Amplitude</span>
+                            <span class="slider-value" id="amplitude-val">1.0</span>
+                        </div>
+                        <input type="range" id="amplitude" min="0.1" max="5" step="0.1" value="1.0">
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Presets</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn active" data-preset="typical">Typical</button>
+                        <button class="preset-btn" data-preset="fast-gain">Fast + Gain</button>
+                        <button class="preset-btn" data-preset="slow-delay">Slow + Delay</button>
+                        <button class="preset-btn" data-preset="no-delay">No Dead Time</button>
+                        <button class="preset-btn" data-preset="large-delay">Large Delay</button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="formula-box">
+                        <span class="formula-label">Transfer Function</span>
+                        G(s) = K · e<sup>−θs</sup> / (τs + 1)
+                    </div>
+                    <div class="info-box" style="margin-top:0.75rem;">
+                        <strong>FOPDT</strong> is the most widely used model in process control. It captures gain (K), speed of response (τ), and transport delay (θ).
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Response Metrics</h3>
+                    <div class="formula-box" style="text-align:left;font-size:0.78rem;line-height:1.9;">
+                        <span class="formula-label">Key Relationships</span>
+                        63.2% at t = θ + τ<br>
+                        95% at t ≈ θ + 3τ<br>
+                        98% at t ≈ θ + 4τ<br>
+                        Final value = K × Amplitude
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div>
+                <div class="chart-container">
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" data-chart="response">Step Response</button>
+                        <button class="chart-tab" data-chart="comparison">Multi-τ Comparison</button>
+                        <button class="chart-tab" data-chart="ramp">Ramp Response</button>
+                    </div>
+                    <div id="chart-response" class="chart-plot"></div>
+                    <div id="chart-comparison" class="chart-plot" style="display:none;"></div>
+                    <div id="chart-ramp" class="chart-plot" style="display:none;"></div>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-label">Final Value</div>
+                        <div class="metric-value" id="metric-final">2.00</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">63.2% Time</div>
+                        <div class="metric-value" id="metric-63">4.0 s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">95% Time</div>
+                        <div class="metric-value" id="metric-95">10.0 s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">98% Time</div>
+                        <div class="metric-value" id="metric-98">13.0 s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Initial Slope</div>
+                        <div class="metric-value" id="metric-slope">0.67</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/fopdt.js"></script>
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.getElementById('nav-links').classList.toggle('open');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>
