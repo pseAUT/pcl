@@ -40,9 +40,7 @@ visual, real-time simulation.
 - **Real-time simulation** — parameter changes are reflected instantly in the response plots.
 - **Hands-on tuning** — adjust P, PI, PID, and advanced controller settings and compare results.
 - **Side-by-side comparison** — overlay multiple responses (e.g. open-loop vs. closed-loop).
-- **Model variety** — first-order, second-order, integrating, and time-delayed processes.
 - **Disturbance testing** — inject step, ramp, impulse, and sinusoidal disturbances.
-- **Performance metrics** — rise time, settling time, overshoot, decay ratio, IAE/ISE/ITAE.
 - **Zero installation** — runs entirely in the browser.
 - **Open and extensible** — add your own models and modules.
 
