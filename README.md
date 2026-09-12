@@ -65,21 +65,3 @@ visual, real-time simulation.
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) ≥ 18 (or Python ≥ 3.10 if running the Python backend)
-- A modern browser (Chrome, Firefox, Edge, Safari)
-- `git`
-
-### Installation
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/pseAUT/pcl.git
-cd pcl
-
-# 2. Install dependencies
-npm install
-
-# 3. Start the development server
-npm run dev
