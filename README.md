@@ -56,13 +56,7 @@ visual, real-time simulation.
 | 2 | **First-Order Systems** | Time constant, steady-state gain, step response |
 | 3 | **Second-Order Systems** | Damping ratio, natural frequency, overshoot, oscillation |
 | 4 | **Dead Time & Inverse Response** | Transport delay, non-minimum-phase behaviour |
-| 5 | **Laplace Transform & Transfer Functions** | Poles, zeros, block-diagram algebra |
-| 6 | **Frequency Response** | Bode plots, Nyquist plots, gain & phase margins |
-| 7 | **Feedback Control Loops** | Servo vs. regulatory control, loop components |
 | 8 | **PID Controllers** | Proportional, integral, derivative actions and their effects |
-| 9 | **Controller Tuning** | Ziegler–Nichols, Cohen–Coon, IMC, SIMC, relay auto-tuning |
-| 10 | **Stability Analysis** | Routh–Hurwitz, root locus, ultimate gain and period |
-| 11 | **Advanced Control** | Cascade, feedforward, ratio, split-range, dead-time compensation (Smith predictor) |
 | 12 | **Multivariable Systems** | Interaction, relative gain array (RGA), decoupling |
 
 > Module availability may vary. See [`docs/`](docs/) for the full list and status.
