@@ -12,7 +12,7 @@ class PIDTankSimulator {
         this.running = false;
         this.simulationTime = 0;
         this.dt = 0.01; // base timestep
-        this.maxTime = 30;
+        this.tEnd = 30; // simulation time (s) — entered in the t_end box
 
         // State
         this.h = 0;
@@ -83,6 +83,7 @@ class PIDTankSimulator {
         this.runPauseText = document.getElementById('run-pause-text');
         this.speedBtns = document.querySelectorAll('.speed-btn');
         this.resetBtn = document.getElementById('reset-btn');
+        this.tendInput = document.getElementById('tend');
 
         // Metrics
         this.metrics = {
@@ -164,6 +165,26 @@ class PIDTankSimulator {
         // Reset
         this.resetBtn.addEventListener('click', () => this.reset());
 
+        // t_end is a text box: commit the typed value on Enter (and on blur).
+        this.commitTend = () => {
+            if (!this.tendInput) return;
+            const raw = parseFloat(this.tendInput.value);
+            if (!isFinite(raw)) { this.tendInput.value = this.tEnd; return; }
+            const lo = parseFloat(this.tendInput.min);
+            const hi = parseFloat(this.tendInput.max);
+            let v = raw;
+            if (isFinite(lo) && v < lo) v = lo;
+            if (isFinite(hi) && v > hi) v = hi;
+            this.tendInput.value = v;
+            this.tEnd = v;
+            // If the run has already passed the new end, stop right away.
+            if (this.running && this.simulationTime >= this.tEnd) this.stopRun();
+        };
+        this.tendInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); this.commitTend(); this.tendInput.blur(); }
+        });
+        this.tendInput.addEventListener('change', () => this.commitTend());
+
         // Presets
         document.querySelectorAll('.preset-btn').forEach(btn => {
             btn.addEventListener('click', () => this.setPreset(btn.dataset.preset));
@@ -218,6 +239,10 @@ class PIDTankSimulator {
     }
 
     toggleRunPause() {
+        // Starting again after the run reached t_end restarts from the origin.
+        if (!this.running && this.tEnd > 0 && this.simulationTime >= this.tEnd - 1e-9) {
+            this.reset();
+        }
         this.running = !this.running;
         this.runPauseIcon.className = this.running ? 'fas fa-pause' : 'fas fa-play';
         this.runPauseText.textContent = this.running ? 'Pause' : 'Run';
@@ -231,12 +256,17 @@ class PIDTankSimulator {
         }
     }
 
-    reset() {
+    stopRun() {
         this.running = false;
         if (this.animationId) cancelAnimationFrame(this.animationId);
+        this.animationId = null;
         this.runPauseIcon.className = 'fas fa-play';
         this.runPauseText.textContent = 'Run';
         this.runPauseBtn.classList.remove('running');
+    }
+
+    reset() {
+        this.stopRun();
 
         this.simulationTime = 0;
         this.h = 0;
@@ -265,10 +295,16 @@ class PIDTankSimulator {
         this.lastFrameTime = now;
 
         // Run simulation steps based on speed (cap to avoid freezing)
-        const stepsThisFrame = Math.min(
+        let stepsThisFrame = Math.min(
             Math.max(1, Math.floor(delta * this.speed / this.dt)),
             500
         );
+        // Never step past t_end.
+        if (this.tEnd > 0) {
+            const remaining = Math.round((this.tEnd - this.simulationTime) / this.dt);
+            if (remaining <= 0) { this.stopRun(); return; }
+            stepsThisFrame = Math.min(stepsThisFrame, remaining);
+        }
 
         for (let i = 0; i < stepsThisFrame; i++) {
             this.stepSimulation();
@@ -277,6 +313,11 @@ class PIDTankSimulator {
         this.updatePlots();
         this.updateTankSVG(this.h, this.prevControl);
         this.updateMetrics();
+
+        if (this.tEnd > 0 && this.simulationTime >= this.tEnd - 1e-9) {
+            this.stopRun();
+            return;
+        }
 
         this.animationId = requestAnimationFrame(() => this.animate());
     }
@@ -330,7 +371,7 @@ class PIDTankSimulator {
             margin: { l: 50, r: 20, t: 10, b: 40 },
             xaxis: { title: 'Time (s)', gridcolor: '#1e293b', zerolinecolor: '#334155' },
             yaxis: { gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.01, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
             hovermode: 'x unified',
             uirevision: 'true'
         };

@@ -37,8 +37,10 @@ class CSTRRunawaySimulator {
         this.solveTimer = null;
         this.currentChart = 'temp';
         this.lastLiveIdx = -1;   // last index drawn on the live chart
-        this.curveFull = true;   // draw the complete solved curve when idle
+        this.curveFull = false;  // never pre-plot; the trajectory fills in as it runs
         this.autoPlay = true;    // allow replay (started by the Run button)
+        this.icLocked = false;   // initial conditions freeze once a run starts
+        this.started = false;    // true once the user has pressed Run
 
         this.initDOM();
         this.bindEvents();
@@ -65,8 +67,7 @@ class CSTRRunawaySimulator {
         });
         this.ca0Num = document.getElementById('ca0-num');
         this.t0Num = document.getElementById('t0-num');
-        this.tendSlider = document.getElementById('tend');
-        this.tendValue = document.getElementById('tend-val');
+        this.tendInput = document.getElementById('tend');
         this.methodSelect = document.getElementById('method');
         this.accuracySelect = document.getElementById('accuracy');
         this.statusEl = document.getElementById('solver-status');
@@ -108,16 +109,31 @@ class CSTRRunawaySimulator {
     }
 
     bindEvents() {
+        // Reactor parameters can be changed while the simulation is running:
+        // the ODE is re-integrated from the current state and the replay keeps
+        // going in real time. Initial conditions are frozen once a run starts.
+        const isInitialCondition = key => key === 'ca0' || key === 't0';
+        const applyChange = (immediate) => {
+            this.readParamsFromUI();
+            if (this.isLiveSession()) {
+                if (immediate) { this.clearSolveTimer(); this.resolveLive(); }
+                else this.scheduleLive();
+            } else if (immediate) {
+                this.solve({ autoPlay: false });
+            } else {
+                this.scheduleSolve();
+            }
+        };
         Object.keys(this.sliders).forEach(key => {
             this.sliders[key].addEventListener('input', () => {
-                this.readParamsFromUI();
-                this.scheduleSolve();
+                if (isInitialCondition(key) && this.icLocked) return;
+                applyChange(false);
             });
             // Solve immediately when the slider is released, so the new result
             // is always shown even if a debounce timer is interrupted.
             this.sliders[key].addEventListener('change', () => {
-                this.readParamsFromUI();
-                this.solve({ autoPlay: false });
+                if (isInitialCondition(key) && this.icLocked) return;
+                applyChange(true);
             });
         });
 
@@ -136,10 +152,12 @@ class CSTRRunawaySimulator {
                 return v;
             };
             numEl.addEventListener('input', () => {
+                if (this.icLocked) return;
                 if (apply() === null) return;
                 this.scheduleSolve();
             });
             numEl.addEventListener('change', () => {
+                if (this.icLocked) return;
                 if (apply() === null) return;
                 this.solve({ autoPlay: false });
             });
@@ -147,16 +165,34 @@ class CSTRRunawaySimulator {
         bindNumber(this.ca0Num, this.sliders.ca0);
         bindNumber(this.t0Num, this.sliders.t0);
 
-        this.tendSlider.addEventListener('input', () => {
-            this.tEnd = parseFloat(this.tendSlider.value);
-            this.tendValue.textContent = this.tEnd.toFixed(1);
-            this.scheduleSolve();
+        // t_end is a text box: the new value is committed on Enter (and on
+        // blur), never on every keystroke.
+        const commitTend = () => {
+            const raw = parseFloat(this.tendInput.value);
+            if (!isFinite(raw)) { this.tendInput.value = this.tEnd; return; }
+            const lo = parseFloat(this.tendInput.min);
+            const hi = parseFloat(this.tendInput.max);
+            let v = raw;
+            if (isFinite(lo) && v < lo) v = lo;
+            if (isFinite(hi) && v > hi) v = hi;
+            this.tendInput.value = v;
+            if (v === this.tEnd) return;   // nothing changed: skip a re-solve
+            this.tEnd = v;
+            if (this.isLiveSession()) {
+                this.clearSolveTimer();
+                this.resolveLive();
+            } else {
+                this.solve({ autoPlay: false });
+            }
+        };
+        this.tendInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                commitTend();
+                this.tendInput.blur();
+            }
         });
-        this.tendSlider.addEventListener('change', () => {
-            this.tEnd = parseFloat(this.tendSlider.value);
-            this.tendValue.textContent = this.tEnd.toFixed(1);
-            this.solve({ autoPlay: false });
-        });
+        this.tendInput.addEventListener('change', () => commitTend());
 
         const onSolverChange = () => {
             this.method = this.methodSelect.value;
@@ -172,7 +208,7 @@ class CSTRRunawaySimulator {
 
         this.runPauseBtn.addEventListener('click', () => this.togglePlay());
         this.resetBtn.addEventListener('click', () => this.resetPlayback());
-        this.solveBtn.addEventListener('click', () => this.solve({ autoPlay: false }));
+        this.solveBtn.addEventListener('click', () => this.solve({ autoPlay: false, showFull: true }));
 
         this.speedBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -264,16 +300,107 @@ class CSTRRunawaySimulator {
         this.solveTimer = setTimeout(() => this.solve({ autoPlay: false }), 180);
     }
 
+    // Coalesce live parameter edits while a run is in progress.
+    scheduleLive() {
+        if (this.solveTimer) clearTimeout(this.solveTimer);
+        this.solveTimer = setTimeout(() => {
+            this.solveTimer = null;
+            this.resolveLive();
+        }, 120);
+    }
+
+    clearSolveTimer() {
+        if (this.solveTimer) { clearTimeout(this.solveTimer); this.solveTimer = null; }
+    }
+
+    accuracySettings() {
+        return {
+            fast: { rtol: 1e-4, atol: 1e-6 },
+            balanced: { rtol: 1e-6, atol: 1e-8 },
+            accurate: { rtol: 1e-7, atol: 1e-9 }
+        }[this.accuracy] || { rtol: 1e-6, atol: 1e-8 };
+    }
+
+    // A run is "live" while replaying or paused part-way through a run the user
+    // actually started. Idle edits (before Run, or after the run finished) go
+    // through a normal re-solve instead.
+    isLiveSession() {
+        if (!this.solution) return false;
+        if (this.running) return true;
+        return this.started && this.playbackIndex < this.solution.t.length - 1;
+    }
+
+    setICLocked(locked) {
+        this.icLocked = locked;
+        [this.sliders.ca0, this.sliders.t0, this.ca0Num, this.t0Num].forEach(el => {
+            if (el) el.disabled = locked;
+        });
+    }
+
+    // Re-integrate from the current playhead state with the (possibly changed)
+    // parameters, keep the already-played history, and let the replay continue
+    // in real time instead of jumping to the full solved curve.
+    resolveLive() {
+        if (this.solveTimer) { clearTimeout(this.solveTimer); this.solveTimer = null; }
+        const sol = this.solution;
+        if (!sol || sol.t.length < 2) { this.solve({ autoPlay: false }); return; }
+
+        const n = sol.t.length;
+        const idx = Math.max(0, Math.min(this.playbackIndex, n - 1));
+        const tCur = sol.t[idx];
+        if (!(this.tEnd > tCur)) { this.solve({ autoPlay: false }); return; }
+        const yCur = [sol.y[idx][0], sol.y[idx][1]];
+        const acc = this.accuracySettings();
+        const span = this.tEnd - tCur;
+
+        let res;
+        try {
+            res = ODELib.solve(
+                (t, y) => this.rhs(t, y),
+                [tCur, this.tEnd],
+                yCur,
+                {
+                    method: this.method,
+                    rtol: acc.rtol,
+                    atol: acc.atol,
+                    dtMax: span / 500,
+                    minPoints: 500,
+                    maxSteps: 20000
+                }
+            );
+        } catch (err) {
+            this.statusEl.textContent = 'Solver error: ' + err.message;
+            return;
+        }
+
+        // Stitch: history up to the playhead + the newly integrated future.
+        const combT = sol.t.slice(0, idx + 1).concat(res.t.slice(1));
+        const combY = sol.y.slice(0, idx + 1).concat(res.y.slice(1));
+        this.solution = { t: combT, y: combY, stats: res.stats };
+
+        this.computeMetrics();
+        this.playbackIndex = idx;
+        this.lastLiveIdx = -1;
+        this.curveFull = false;
+
+        this.updateStatus();
+        this.updateMetrics();
+        try {
+            this.updateCharts();
+            this.updateSchematic(idx);
+        } catch (e) {
+            console.error('chart update failed', e);
+        }
+        // The animation loop (if running) picks up the new trajectory and keeps
+        // revealing it; if paused, the new future waits until the user resumes.
+    }
+
     solve(opts) {
         opts = opts || {};
         if (this.solveTimer) { clearTimeout(this.solveTimer); this.solveTimer = null; }
         this.pause();
 
-        const acc = {
-            fast: { rtol: 1e-4, atol: 1e-6 },
-            balanced: { rtol: 1e-6, atol: 1e-8 },
-            accurate: { rtol: 1e-7, atol: 1e-9 }
-        }[this.accuracy] || { rtol: 1e-6, atol: 1e-8 };
+        const acc = this.accuracySettings();
 
         const x0 = [this.params.ca0, this.params.t0];
         const tspan = [0, this.tEnd];
@@ -303,8 +430,11 @@ class CSTRRunawaySimulator {
         this.playbackIndex = 0;
         this.playbackTime = 0;
         this.lastLiveIdx = -1;
+        this.started = false;
         const autoPlay = opts.autoPlay === true;
-        this.curveFull = !autoPlay;   // idle -> show the complete solved curve
+        // Never pre-plot: unless explicitly asked (the Solve button), the chart
+        // only shows the initial state and fills in as the run plays.
+        this.curveFull = autoPlay ? false : (opts.showFull === true);
 
         // Status + metrics first: a chart error must never hide solver info.
         this.updateStatus();
@@ -317,7 +447,7 @@ class CSTRRunawaySimulator {
         }
 
         if (autoPlay) this.startPlayback();
-        else this.setPlayButton(false);
+        else { this.setPlayButton(false); this.setICLocked(false); }
     }
 
     computeMetrics() {
@@ -389,6 +519,8 @@ class CSTRRunawaySimulator {
         if (!this.solution) return;
         if (this.animationId) cancelAnimationFrame(this.animationId);
         this.running = true;
+        this.started = true;      // a real run is now in progress
+        this.setICLocked(true);   // initial conditions freeze for this run
         this.setPlayButton(true);
         this.lastFrame = performance.now();
         this.animationId = requestAnimationFrame(() => this.animate());
@@ -421,7 +553,9 @@ class CSTRRunawaySimulator {
         this.playbackIndex = 0;
         this.playbackTime = 0;
         this.lastLiveIdx = -1;
-        this.curveFull = true;
+        this.curveFull = false;   // back to the initial state; Run plays it
+        this.started = false;
+        this.setICLocked(false);
         try {
             this.updateCharts();
             this.updateSchematic(0);
@@ -449,6 +583,7 @@ class CSTRRunawaySimulator {
             this.updateSchematic(n - 1);
             this.updateChartsLive(true);
             this.pause();
+            this.setICLocked(false);   // run finished: ICs editable again
             return;
         }
         this.animationId = requestAnimationFrame(() => this.animate());
@@ -517,7 +652,7 @@ class CSTRRunawaySimulator {
             margin: { l: 55, r: 20, t: 10, b: 40 },
             xaxis: { title: xTitle, gridcolor: '#1e293b', zerolinecolor: '#334155' },
             yaxis: { title: yTitle, gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.01, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
             hovermode: 'x unified',
             uirevision: 'true'
         };

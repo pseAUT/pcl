@@ -25,6 +25,7 @@ class CSTRControlSimulator {
         this.maxStepsPerFrame = 1200;
         this.running = false;
         this.simTime = 0;
+        this.tEnd = 60;               // simulation time (s) — t_end box
 
         this.CA = this.params.ca0;
         this.T = this.params.t0;
@@ -71,6 +72,7 @@ class CSTRControlSimulator {
         this.speedBtns = document.querySelectorAll('.speed-btn');
         this.chartTabs = document.querySelectorAll('.chart-tab');
         this.currentChart = 'temp';
+        this.tendInput = document.getElementById('tend');
 
         this.liquid = document.getElementById('cstrc-liquid');
         this.agitator = document.getElementById('cstrc-agitator');
@@ -180,6 +182,27 @@ class CSTRControlSimulator {
 
         this.runPauseBtn.addEventListener('click', () => this.toggleRunPause());
         this.resetBtn.addEventListener('click', () => this.reset());
+
+        // t_end is a text box: commit the typed value on Enter (and on blur).
+        const commitTend = () => {
+            if (!this.tendInput) return;
+            const raw = parseFloat(this.tendInput.value);
+            if (!isFinite(raw)) { this.tendInput.value = this.tEnd; return; }
+            const lo = parseFloat(this.tendInput.min);
+            const hi = parseFloat(this.tendInput.max);
+            let v = raw;
+            if (isFinite(lo) && v < lo) v = lo;
+            if (isFinite(hi) && v > hi) v = hi;
+            this.tendInput.value = v;
+            this.tEnd = v;
+            // If the run has already passed the new end, stop right away.
+            if (this.running && this.simTime >= this.tEnd) this.stopRun();
+        };
+        this.tendInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); commitTend(); this.tendInput.blur(); }
+        });
+        this.tendInput.addEventListener('change', () => commitTend());
+
         this.speedBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 this.speed = parseInt(btn.dataset.speed);
@@ -266,10 +289,7 @@ class CSTRControlSimulator {
     /* Run / reset                                                      */
     /* ---------------------------------------------------------------- */
     reset() {
-        this.running = false;
-        if (this.animationId) cancelAnimationFrame(this.animationId);
-        this.animationId = null;
-        this.setRunButton(false);
+        this.stopRun();
 
         this.simTime = 0;
         this.CA = this.params.ca0;
@@ -291,7 +311,18 @@ class CSTRControlSimulator {
         this.runPauseBtn.classList.toggle('running', running);
     }
 
+    stopRun() {
+        this.running = false;
+        if (this.animationId) cancelAnimationFrame(this.animationId);
+        this.animationId = null;
+        this.setRunButton(false);
+    }
+
     toggleRunPause() {
+        // Starting again after the run reached t_end restarts from the origin.
+        if (!this.running && this.tEnd > 0 && this.simTime >= this.tEnd - 1e-9) {
+            this.reset();
+        }
         this.running = !this.running;
         this.setRunButton(this.running);
         if (this.running) {
@@ -310,11 +341,22 @@ class CSTRControlSimulator {
 
         let steps = Math.floor(delta * this.speed / this.dt);
         steps = Math.min(Math.max(1, steps), this.maxStepsPerFrame);
+        // Never step past t_end.
+        if (this.tEnd > 0) {
+            const remaining = Math.round((this.tEnd - this.simTime) / this.dt);
+            if (remaining <= 0) { this.stopRun(); return; }
+            steps = Math.min(steps, remaining);
+        }
         for (let i = 0; i < steps; i++) this.stepSimulation();
 
         this.updateCharts();
         this.updateSchematic();
         this.updateMetrics();
+
+        if (this.tEnd > 0 && this.simTime >= this.tEnd - 1e-9) {
+            this.stopRun();
+            return;
+        }
 
         this.animationId = requestAnimationFrame(() => this.animate());
     }
@@ -330,7 +372,7 @@ class CSTRControlSimulator {
             margin: { l: 55, r: 55, t: 10, b: 40 },
             xaxis: { title: xTitle, gridcolor: '#1e293b', zerolinecolor: '#334155' },
             yaxis: { title: yTitle, gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.01, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
             hovermode: 'x unified',
             uirevision: 'true'
         };

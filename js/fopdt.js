@@ -86,7 +86,7 @@ class FOPDTSimulator {
             margin: { l: 50, r: 20, t: 10, b: 40 },
             xaxis: { title: 'Time (s)', gridcolor: '#1e293b', zerolinecolor: '#334155' },
             yaxis: { title: 'Output', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.01, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
             hovermode: 'x unified',
             uirevision: 'true'
         };
@@ -163,7 +163,7 @@ class FOPDTSimulator {
             margin: { l: 50, r: 20, t: 10, b: 40 },
             xaxis: { title: 'Time (s)', gridcolor: '#1e293b', zerolinecolor: '#334155' },
             yaxis: { title: 'Output', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.01, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
             hovermode: 'x unified', uirevision: 'true'
         };
 

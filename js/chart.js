@@ -210,9 +210,16 @@
         render() {
             const c = this.container;
             if (!c) return;
-            const width = c.clientWidth || (c.parentElement && c.parentElement.clientWidth) || 600;
-            const height = this.layout.height || c.clientHeight || 350;
+            // Never lay out a hidden chart. A display:none container reports
+            // clientWidth 0; the old fallback to c.parentElement.clientWidth
+            // includes the parent's padding, so it produced an over-wide SVG.
+            // Once that chart was shown, the oversized SVG inflated its grid
+            // track, making the next hidden render wider again - the plot boxes
+            // grew on every tab switch. Wait until the chart is actually shown
+            // (switchChart calls Plotly.Plots.resize) and size to its own box.
+            const width = c.clientWidth;
             if (width <= 1) return;
+            const height = this.layout.height || c.clientHeight || 350;
 
             const L = this.layout;
             const font = Object.assign({ color: '#94a3b8', family: 'inherit', size: 11 }, L.font);
@@ -422,12 +429,14 @@
             // ---- legend ----
             if (L.showlegend !== false && legendItems.length) {
                 const lg = L.legend || {};
-                const lx = x0 + 8 + (x1 - x0) * (lg.x != null && lg.x > 0.5 ? 0 : 0);
                 const rightSide = lg.x != null && lg.x > 0.5;
-                let ly = y0 + 12;
+                // On the right the legend sits below the Fit button so the two
+                // never overlap; on the left it stays at the top-left.
+                const yShift = rightSide ? 18 : 0;
+                let ly = y0 + 12 + yShift;
                 const boxW = 150;
                 const bx = rightSide ? x1 - boxW - 6 : x0 + 6;
-                const bg = svgEl('rect', { x: bx, y: y0 + 4, width: boxW, height: 16 * legendItems.length + 8, rx: 6, fill: lg.bgcolor || 'rgba(30,41,59,0.85)', stroke: '#334155', 'stroke-width': 1 });
+                const bg = svgEl('rect', { x: bx, y: y0 + 4 + yShift, width: boxW, height: 16 * legendItems.length + 8, rx: 6, fill: lg.bgcolor || 'rgba(30,41,59,0.85)', stroke: '#334155', 'stroke-width': 1 });
                 gLegend.appendChild(bg);
                 legendItems.forEach((it, i) => {
                     const yy = ly + 4 + i * 16;
