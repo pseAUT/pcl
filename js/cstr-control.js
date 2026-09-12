@@ -69,6 +69,8 @@ class CSTRControlSimulator {
         this.runPauseText = document.getElementById('run-pause-text');
         this.resetBtn = document.getElementById('reset-btn');
         this.speedBtns = document.querySelectorAll('.speed-btn');
+        this.chartTabs = document.querySelectorAll('.chart-tab');
+        this.currentChart = 'temp';
 
         this.liquid = document.getElementById('cstrc-liquid');
         this.agitator = document.getElementById('cstrc-agitator');
@@ -78,6 +80,10 @@ class CSTRControlSimulator {
         this.coolantValve = document.getElementById('cstrc-coolant-valve');
         this.tcLabel = document.getElementById('cstrc-tc-label');
         this.qLabel = document.getElementById('cstrc-q-label');
+        this.feedFlow = document.getElementById('cstrc-feed-flow');
+        this.coolantFlow = document.getElementById('cstrc-coolant-flow');
+        this.productFlow = document.getElementById('cstrc-product-flow');
+        this.coolantOutFlow = document.getElementById('cstrc-coolout-flow');
 
         this.readouts = {
             time: document.getElementById('roc-time'),
@@ -179,6 +185,28 @@ class CSTRControlSimulator {
                 this.speed = parseInt(btn.dataset.speed);
                 this.speedBtns.forEach(b => b.classList.toggle('active', b === btn));
             });
+        });
+
+        // One tab per control loop (PV on top, its MV below).
+        this.chartTabs.forEach(tab => {
+            tab.addEventListener('click', () => this.switchChart(tab.dataset.chart));
+        });
+    }
+
+    // Show the temperature-loop or concentration-loop pair of charts.
+    switchChart(chart) {
+        this.currentChart = chart;
+        this.chartTabs.forEach(t => t.classList.toggle('active', t.dataset.chart === chart));
+        const tempTab = document.getElementById('tab-temp');
+        const concTab = document.getElementById('tab-conc');
+        if (tempTab) tempTab.style.display = chart === 'temp' ? 'block' : 'none';
+        if (concTab) concTab.style.display = chart === 'conc' ? 'block' : 'none';
+        // Hidden plots are created with zero size; resize once they are shown.
+        ['chart-temp', 'chart-tc', 'chart-conc', 'chart-q'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.offsetParent !== null) {
+                try { Plotly.Plots.resize(el); } catch (e) { /* not ready yet */ }
+            }
         });
     }
 
@@ -377,6 +405,16 @@ class CSTRControlSimulator {
         }
         if (this.tcLabel) this.tcLabel.textContent = 'Tc = ' + Tc.toFixed(0) + ' K';
         if (this.qLabel) this.qLabel.textContent = 'q = ' + q.toFixed(0);
+
+        // Animate the process streams: dash speed tracks the manipulated
+        // variables, so a larger feed flow or colder coolant visibly flows faster.
+        const feedDur = Math.max(0.25, Math.min(2.5, 40 / Math.max(q, 1)));
+        if (this.feedFlow) this.feedFlow.style.animationDuration = feedDur.toFixed(2) + 's';
+        if (this.productFlow) this.productFlow.style.animationDuration = feedDur.toFixed(2) + 's';
+        const coolOpen = Math.max(0, Math.min(1, (this.tcMax - Tc) / (this.tcMax - this.tcMin)));
+        const coolDur = Math.max(0.3, 1.8 - coolOpen * 1.5);
+        if (this.coolantFlow) this.coolantFlow.style.animationDuration = coolDur.toFixed(2) + 's';
+        if (this.coolantOutFlow) this.coolantOutFlow.style.animationDuration = coolDur.toFixed(2) + 's';
 
         // Agitator speed with reaction rate
         const k = this.params.k0 * Math.exp(-this.params.eoverr / Math.max(T, 1e-6));

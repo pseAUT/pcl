@@ -34,6 +34,7 @@ class PIDTankSimulator {
         this.bufferSize = 3000;
         this.timeData = [];
         this.levelData = [];
+        this.spData = [];
         this.controlData = [];
         this.errorData = [];
 
@@ -247,6 +248,7 @@ class PIDTankSimulator {
         this.pid.reset();
         this.timeData = [];
         this.levelData = [];
+        this.spData = [];
         this.controlData = [];
         this.errorData = [];
 
@@ -303,6 +305,7 @@ class PIDTankSimulator {
         if (this.timeData.length === 0 || this.simulationTime - this.timeData[this.timeData.length - 1] >= 0.05) {
             this.timeData.push(this.simulationTime);
             this.levelData.push(this.h);
+            this.spData.push(this.params.setpoint);
             this.controlData.push(u);
             this.errorData.push(e);
 
@@ -310,6 +313,7 @@ class PIDTankSimulator {
             if (this.timeData.length > this.bufferSize) {
                 this.timeData.shift();
                 this.levelData.shift();
+                this.spData.shift();
                 this.controlData.shift();
                 this.errorData.shift();
             }
@@ -331,10 +335,11 @@ class PIDTankSimulator {
             uirevision: 'true'
         };
 
-        // Tank Level Plot
+        // Tank Level Plot. The setpoint is drawn last (on top) as a dashed
+        // staircase so every setpoint move stays visible on the figure.
         Plotly.newPlot('chart-tank', [
-            { x: [], y: [], name: 'Setpoint', line: { color: '#fbbf24', width: 2, dash: 'dash' } },
-            { x: [], y: [], name: 'Tank Level', line: { color: '#06b6d4', width: 3 }, fill: 'tozeroy', fillcolor: 'rgba(6,182,212,0.1)' }
+            { x: [], y: [], name: 'Tank Level', line: { color: '#06b6d4', width: 3 }, fill: 'tozeroy', fillcolor: 'rgba(6,182,212,0.1)' },
+            { x: [], y: [], name: 'Setpoint', line: { color: '#fbbf24', width: 2.5, dash: 'dash' } }
         ], { ...layout, yaxis: { ...layout.yaxis, title: 'Level (m)' } }, { responsive: true, displayModeBar: false });
 
         // Control Signal Plot
@@ -350,12 +355,26 @@ class PIDTankSimulator {
     }
 
     updatePlots() {
-        const setpointLine = this.timeData.map(() => this.params.setpoint);
         const outflowData = this.levelData.map(h => h / this.params.resistance);
+
+        // Recorded setpoint history -> a dashed staircase that moves with every
+        // setpoint change. A pending point is appended when the setpoint has
+        // just changed but the next sample has not been stored yet (e.g. paused),
+        // so the move is visible immediately.
+        let spX = this.timeData;
+        let spY = this.spData;
+        const lastSP = this.spData.length ? this.spData[this.spData.length - 1] : null;
+        if (this.timeData.length && lastSP !== this.params.setpoint) {
+            spX = this.timeData.concat([this.simulationTime]);
+            spY = this.spData.concat([this.params.setpoint]);
+        }
 
         // Rolling time window (keep last 20 seconds visible)
         const windowSpan = 20;
-        const tEnd = this.timeData.length ? this.timeData[this.timeData.length - 1] : windowSpan;
+        const tEnd = Math.max(
+            this.timeData.length ? this.timeData[this.timeData.length - 1] : 0,
+            this.simulationTime
+        ) || windowSpan;
         const tStart = Math.max(0, tEnd - windowSpan);
 
         // Vertical marker at the last setpoint step (if it is in view)
@@ -376,8 +395,8 @@ class PIDTankSimulator {
 
         // Update every chart: PV on top, its MV directly below.
         Plotly.update('chart-tank', {
-            x: [this.timeData, this.timeData],
-            y: [setpointLine, this.levelData]
+            x: [this.timeData, spX],
+            y: [this.levelData, spY]
         }, layoutUpdate);
         Plotly.update('chart-control', {
             x: [this.timeData, this.timeData],
@@ -395,6 +414,7 @@ class PIDTankSimulator {
         this.inflowArrow = document.getElementById('inflow-arrow');
         this.outflowArrow = document.getElementById('outflow-arrow');
         this.setpointLine = document.getElementById('setpoint-line');
+        this.setpointLabel = document.getElementById('setpoint-label');
         this.valveOpening = document.getElementById('valve-opening');
         this.waterWave = document.getElementById('water-wave');
     }
@@ -427,6 +447,10 @@ class PIDTankSimulator {
         if (this.setpointLine) {
             this.setpointLine.setAttribute('y1', spY);
             this.setpointLine.setAttribute('y2', spY);
+        }
+        // Keep the "SP" label riding on the dashed line.
+        if (this.setpointLabel) {
+            this.setpointLabel.setAttribute('y', spY + 3);
         }
 
         // Inflow arrow animation (size based on control)

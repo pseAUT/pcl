@@ -13,15 +13,24 @@
  *           (reduces overshoot without slowing disturbance rejection).
  *   gamma : derivative setpoint weight (2-DOF).  gamma = 0 -> derivative on
  *           measurement (no derivative kick).  gamma = 1 -> derivative on error.
- *   alpha : first-order derivative filter (0 = off, -> 1 = heavy smoothing).
- *           D_f[k] = alpha*D_f[k-1] + (1-alpha)*D_raw[k]
  *
- *   antiWindup : when true, conditional-integration ("clamping") prevents the
- *           integral from winding up while the output is saturated. When false
- *           the integral is allowed to wind up (useful for demonstration).
+ *   alpha : first-order derivative filter strength (0 = off, -> 1 = heavy
+ *           smoothing).  The filter is the standard first-order low-pass
+ *             Df[k] = a*Df[k-1] + (1-a)*D_raw[k],  a = exp(-dt/tau)
+ *           where the time constant tau is taken from the alpha slider at a
+ *           fixed reference step dtRef.  This makes the physical smoothing
+ *           independent of the simulator's integration step (previously the
+ *           same alpha gave a 5x different time constant in the 0.002 s CSTR
+ *           and the 0.01 s tank loops).
  *
- * The derivative is computed directly from the raw measurements; callers that
- * need derivative filtering can low-pass the PV before feeding it in.
+ *   antiWindup : when true, back-calculation ("anti-reset windup") bleeds the
+ *           integral by the amount the actuator is over-driven. Unlike the old
+ *           error-sign test this is robust to noisy measurements, and the
+ *           integral is always kept inside [iMin, iMax].
+ *
+ * The last update exposes the individual contributions in this.terms
+ * ({P, I, D, bias, out, saturated}) so the UI can show how each term of the
+ * equation contributes to the manipulated variable.
  * ==========================================================================*/
 class PIDController {
     constructor(opts) {
@@ -38,6 +47,10 @@ class PIDController {
         this.gamma = opts.gamma != null ? opts.gamma : 0;
         this.alpha = opts.alpha != null ? opts.alpha : 0;   // derivative filter (0 = off)
         this.antiWindup = opts.antiWindup != null ? opts.antiWindup : true;
+        // Reference step (s) at which alpha is defined, and the back-calculation
+        // tracking time (s). trackingTime defaults to the integral time Kp/Ki.
+        this.dtRef = opts.dtRef != null ? opts.dtRef : 0.01;
+        this.trackingTime = opts.trackingTime != null ? opts.trackingTime : null;
         this.reset();
     }
 
@@ -46,6 +59,17 @@ class PIDController {
         this.prevPv = null;
         this.prevSP = null;
         this.dFiltered = 0;
+        this.terms = { P: 0, I: 0, D: 0, bias: this.bias, out: this.bias, saturated: false };
+    }
+
+    // Per-step retention of the first-order derivative filter. alpha is the
+    // retention over the reference step dtRef; converting it to a continuous
+    // time constant makes the smoothing independent of the integration step.
+    filterCoefficient(dt) {
+        if (!(this.alpha > 0)) return 0;          // filter off -> D = D_raw
+        if (this.alpha >= 1) return 1;            // fully frozen
+        const tau = -this.dtRef / Math.log(this.alpha);
+        return tau > 0 ? Math.exp(-dt / tau) : 0;
     }
 
     update(sp, pv, dt) {
@@ -57,30 +81,45 @@ class PIDController {
         this.prevSP = sp;
         this.prevPv = pv;
 
+        // 2-DOF proportional action (setpoint weighted) and derivative action
+        // (measurement weighted when gamma = 0, so a setpoint step has no kick).
         const P = this.kp * (this.beta * sp - pv);
         const D_raw = this.kd * (this.gamma * dSP - dPV);
-        // First-order (exponential) derivative filter. alpha = 0 -> no filter,
-        // alpha -> 1 -> heavy smoothing (useful when the PV is noisy).
-        this.dFiltered = this.alpha * this.dFiltered + (1 - this.alpha) * D_raw;
-        const D = this.dFiltered;
-        const I_try = this.integral + this.ki * e * dt;
 
+        // First-order derivative filter.
+        const a = this.filterCoefficient(dt);
+        this.dFiltered = a * this.dFiltered + (1 - a) * D_raw;
+        const D = this.dFiltered;
+
+        const I_try = this.integral + this.ki * e * dt;
         let out = this.bias + P + I_try + D;
+        let saturated = false;
 
         if (this.antiWindup) {
-            // Conditional integration: freeze the integral when the output is
-            // saturated and the error would push it further into saturation.
-            const satHigh = out > this.max && e > 0;
-            const satLow = out < this.min && e < 0;
-            if (!satHigh && !satLow) {
-                this.integral = Math.max(this.iMin, Math.min(this.iMax, I_try));
+            const uSat = Math.max(this.min, Math.min(this.max, out));
+            saturated = uSat !== out;
+            let I_new = I_try;
+            if (saturated) {
+                // Back-calculation: bleed the integral by the over-drive, so it
+                // settles at the value that holds the actuator on its limit.
+                const Tt = this.trackingTime != null
+                    ? this.trackingTime
+                    : (this.ki > 0 ? Math.max(this.kp / this.ki, dt) : Math.max(dt, 0.1));
+                I_new = I_try + (dt / Tt) * (uSat - out);
             }
+            this.integral = Math.max(this.iMin, Math.min(this.iMax, I_new));
             out = this.bias + P + this.integral + D;
         } else {
             this.integral = I_try;
         }
 
-        return Math.max(this.min, Math.min(this.max, out));
+        const clamped = Math.max(this.min, Math.min(this.max, out));
+        this.terms = {
+            P, I: this.integral, D, bias: this.bias,
+            out: clamped,
+            saturated: saturated || clamped !== out
+        };
+        return clamped;
     }
 }
 
