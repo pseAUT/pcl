@@ -57,9 +57,6 @@ visual, real-time simulation.
 | 8 | **PID Controllers** | Proportional, integral, derivative actions and their effects |
 | 12 | **Multivariable Systems** | Interaction, relative gain array (RGA), decoupling |
 
-> Module availability may vary. See [`docs/`](docs/) for the full list and status.
-
----
 
 ## 🚀 Getting Started
 
