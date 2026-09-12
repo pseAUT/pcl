@@ -14,7 +14,7 @@ Explore fundamental process control concepts through real-time interactive simul
 
 This platform provides an **interactive, browser-based environment** for learning and teaching
 **Process Dynamics & Control**. Instead of reading static derivations, learners manipulate
-system parameters — gains, time constants, dead times, controller settings — and immediately
+system parameters,  gains, time constants, dead times, controller settings, and immediately
 observe how the process responds.
 
 The goal is to build intuition for the dynamic behaviour of chemical and process systems,
