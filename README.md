@@ -50,13 +50,14 @@ visual, real-time simulation.
 
 | # | Module | Key Concepts |
 | --- | --- | --- |
-| 1 | **Process Modelling** | Conservation laws, lumped vs. distributed systems, linearisation |
+| 1 | **Process Modelling** | Conservation laws, lumped vs. distributed systems, linearization |
 | 2 | **First-Order Systems** | Time constant, steady-state gain, step response |
 | 3 | **Second-Order Systems** | Damping ratio, natural frequency, overshoot, oscillation |
-| 4 | **Dead Time & Inverse Response** | Transport delay, non-minimum-phase behaviour |
+| 4 | **Dead Time & Inverse Response** | Transport delay, non-minimum-phase behavior |
 | 8 | **PID Controllers** | Proportional, integral, derivative actions and their effects |
 | 12 | **Multivariable Systems** | Interaction, relative gain array (RGA), decoupling |
 
 
 ## 🚀 Getting Started
-
+Clone the repository and open the index.html with your browser. 
+Or simply go to [pseaut.github.io/pcl/](https://pseaut.github.io/pcl/).
