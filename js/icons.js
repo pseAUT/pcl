@@ -28,7 +28,9 @@
         'fa-bars': '<rect x="3" y="5" width="18" height="2.6"/><rect x="3" y="10.7" width="18" height="2.6"/><rect x="3" y="16.4" width="18" height="2.6"/>',
         'fa-times': '<path d="M6 4l6 6 6-6 2 2-6 6 6 6-2 2-6-6-6 6-2-2 6-6-6-6Z"/>',
         'fa-check-circle': '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.5 14.5-5-5L7 10l3.5 3.5L17 7l1.5 1.5Z"/>',
-        'fa-minus-circle': '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM7 11h10v2H7Z"/>'
+        'fa-minus-circle': '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM7 11h10v2H7Z"/>',
+        'fa-book': '<path d="M4 3h7a2 2 0 0 1 2 2v15a3 3 0 0 0-2.5-2H4Z"/><path d="M20 3h-7a2 2 0 0 0-2 2v15a3 3 0 0 1 2.5-2H20Z"/>',
+        'fa-external-link-alt': '<path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14Z"/><path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5v2H5v12h12v-5Z"/>'
     };
 
     var css = '';
