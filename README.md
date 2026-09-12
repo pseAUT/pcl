@@ -28,7 +28,7 @@ visual, real-time simulation.
 | Resource | Link |
 | --- | --- |
 | **Course website, slides & supplementary material** | [chemeng.aut.ac.ir/content/9277](https://chemeng.aut.ac.ir/content/9277/Process-Dynamics-and-Control) |
-| **Code & simulation library (PSE @ AUT)** | [[github.com/pseAUT/pcl](https://pseaut.github.io/pcl/)]([https://github.com/pseAUT/pcl](https://pseaut.github.io/pcl/)) |
+| **Code & simulation library (PSE @ AUT)** |  [pseaut.github.io/pcl/](https://pseaut.github.io/pcl/)
 
 > The course website hosts lecture slides, notes, problem sets, and additional reading.
 > The `pcl` repository provides the underlying process-control library used by the simulations.
