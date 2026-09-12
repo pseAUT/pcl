@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PID Tank Level Control — PDC Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/icons.js"></script>
+    <script src="js/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <i class="fas fa-wave-square"></i>
+            <span>PDC Lab</span>
+        </a>
+        <div class="nav-institution">
+            <span class="ni-lab">PSE Lab</span>
+            <span class="ni-school">Amirkabir University of Technology (Tehran's Polytechnic)</span>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="pid-tank.html" class="active">PID Tank</a>
+            <a href="fopdt.html">FOPDT</a>
+            <a href="second-order.html">2nd Order</a>
+            <a href="cstr-runaway.html">CSTR</a>
+            <a href="cstr-control.html">CSTR Control</a>
+        </div>
+    </nav>
+
+    <div class="example-page">
+        <div class="page-header">
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <h1><i class="fas fa-water" style="color:var(--primary);"></i> PID Tank Level Control</h1>
+            <p>Real-time simulation with animated tank schematic. Run/pause and adjust speed from 1x to 100x.</p>
+        </div>
+
+        <div class="page-layout">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <!-- Simulation Controls -->
+                <div class="panel-section">
+                    <h3>Simulation Control</h3>
+                    <div class="sim-controls">
+                        <button class="run-pause-btn" id="run-pause-btn">
+                            <i class="fas fa-play" id="run-pause-icon"></i>
+                            <span id="run-pause-text">Run</span>
+                        </button>
+                        <button class="reset-btn" id="reset-btn">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </div>
+                    <div class="speed-controls">
+                        <label>Simulation Speed</label>
+                        <button class="speed-btn" data-speed="1">1x</button>
+                        <button class="speed-btn active" data-speed="10">10x</button>
+                        <button class="speed-btn" data-speed="50">50x</button>
+                        <button class="speed-btn" data-speed="100">100x</button>
+                    </div>
+                </div>
+
+                <!-- PID Gains -->
+                <div class="panel-section">
+                    <h3>PID Controller Gains</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Kp — Proportional</span>
+                            <span class="slider-value" id="kp-val">2.0</span>
+                        </div>
+                        <input type="range" id="kp" min="0" max="20" step="0.1" value="2.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Ki — Integral</span>
+                            <span class="slider-value" id="ki-val">0.5</span>
+                        </div>
+                        <input type="range" id="ki" min="0" max="10" step="0.05" value="0.5">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Kd — Derivative</span>
+                            <span class="slider-value" id="kd-val">0.0</span>
+                        </div>
+                        <input type="range" id="kd" min="0" max="10" step="0.05" value="0.0">
+                    </div>
+                </div>
+
+                <!-- Controller Options -->
+                <div class="panel-section">
+                    <h3>Controller Options (HYSYS-style)</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">β — P Setpoint Weight</span>
+                            <span class="slider-value" id="beta-val">1.00</span>
+                        </div>
+                        <input type="range" id="beta" min="0" max="1" step="0.05" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">γ — D Setpoint Weight</span>
+                            <span class="slider-value" id="gamma-val">0.00</span>
+                        </div>
+                        <input type="range" id="gamma" min="0" max="1" step="0.05" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">PV Noise σ (m)</span>
+                            <span class="slider-value" id="noise-val">0.000</span>
+                        </div>
+                        <input type="range" id="noise" min="0" max="0.5" step="0.001" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">α — Derivative Filter (0 = off)</span>
+                            <span class="slider-value" id="alpha-val">0.00</span>
+                        </div>
+                        <input type="range" id="alpha" min="0" max="0.95" step="0.05" value="0">
+                    </div>
+                    <label class="check-row">
+                        <input type="checkbox" id="antiwindup" checked>
+                        <span>Anti-reset windup (clamping)</span>
+                    </label>
+                    <p class="hint">β &lt; 1 softens the setpoint response (2-DOF). γ = 0 uses derivative-on-measurement. Turn windup off to see integral windup during saturation.</p>
+                </div>
+
+                <!-- System Settings -->
+                <div class="panel-section">
+                    <h3>System Settings</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Setpoint (m)</span>
+                            <span class="slider-value" id="sp-val">5.0</span>
+                        </div>
+                        <input type="range" id="setpoint" min="0" max="10" step="0.1" value="5.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Tank Area (m²)</span>
+                            <span class="slider-value" id="area-val">2.0</span>
+                        </div>
+                        <input type="range" id="tank-area" min="0.5" max="5" step="0.1" value="2.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Flow Resistance (R)</span>
+                            <span class="slider-value" id="resistance-val">1.0</span>
+                        </div>
+                        <input type="range" id="resistance" min="0.2" max="5" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Disturbance (m³/s)</span>
+                            <span class="slider-value" id="dist-val">0.0</span>
+                        </div>
+                        <input type="range" id="disturbance" min="-2" max="2" step="0.1" value="0.0">
+                    </div>
+                </div>
+
+                <!-- Setpoint Step -->
+                <div class="panel-section">
+                    <h3>Setpoint Step (live)</h3>
+                    <div class="step-buttons">
+                        <button class="step-btn" data-step="-1"><i class="fas fa-arrow-down"></i> 1 m</button>
+                        <button class="step-btn" data-step="-0.5"><i class="fas fa-arrow-down"></i> 0.5 m</button>
+                        <button class="step-btn" data-step="0.5"><i class="fas fa-arrow-up"></i> 0.5 m</button>
+                        <button class="step-btn" data-step="1"><i class="fas fa-arrow-up"></i> 1 m</button>
+                    </div>
+                    <p class="hint">Step the setpoint while running to watch the transient response.</p>
+                </div>
+
+                <!-- Presets -->
+                <div class="panel-section">
+                    <h3>Presets</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="p-only">P Only</button>
+                        <button class="preset-btn" data-preset="pi">PI</button>
+                        <button class="preset-btn active" data-preset="pid">PID</button>
+                        <button class="preset-btn" data-preset="aggressive">Aggressive</button>
+                        <button class="preset-btn" data-preset="conservative">Conservative</button>
+                    </div>
+                </div>
+
+                <!-- Formula -->
+                <div class="panel-section">
+                    <div class="formula-box">
+                        <span class="formula-label">Transfer Function</span>
+                        G(s) = 1 / (A·s + 1/R)<br>
+                        Controller: u = Kp·e + Ki·∫e dt + Kd·de/dt
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Schematic + Charts -->
+            <div>
+                <!-- Tank Schematic -->
+                <div class="tank-schematic-container">
+                    <div class="tank-schematic-header">
+                        <h3>Tank Schematic</h3>
+                        <div class="live-indicator">
+                            <span class="live-dot"></span>
+                            LIVE
+                        </div>
+                    </div>
+                    <div class="tank-svg-wrapper">
+                        <svg id="tank-svg" viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#0369a1;stop-opacity:0.9" />
+                                </linearGradient>
+                                <linearGradient id="pipeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#475569" />
+                                    <stop offset="50%" style="stop-color:#64748b" />
+                                    <stop offset="100%" style="stop-color:#475569" />
+                                </linearGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                    <feMerge>
+                                        <feMergeNode in="coloredBlur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+
+                            <!-- Background -->
+                            <rect x="0" y="0" width="400" height="420" fill="transparent"/>
+
+                            <!-- Inflow Pipe (top left) -->
+                            <rect x="20" y="80" width="80" height="16" rx="3" fill="url(#pipeGradient)" stroke="#334155" stroke-width="1"/>
+                            <!-- Inflow arrow -->
+                            <g id="inflow-arrow">
+                                <line x1="45" y1="88" x2="65" y2="88" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+                                <polygon points="63,82 73,88 63,94" fill="#0ea5e9"/>
+                            </g>
+                            <text x="40" y="72" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif" text-anchor="middle">Inflow</text>
+
+                            <!-- Controller Valve -->
+                            <g id="controller-valve">
+                                <rect x="85" y="72" width="24" height="32" rx="4" fill="#1e293b" stroke="#0ea5e9" stroke-width="2"/>
+                                <rect id="valve-opening" x="91" y="82" width="12" height="20" rx="2" fill="#0ea5e9" opacity="0.6"/>
+                                <text x="97" y="65" fill="#0ea5e9" font-size="9" font-family="Inter, sans-serif" text-anchor="middle" font-weight="600">V</text>
+                            </g>
+
+                            <!-- Tank Body -->
+                            <rect x="120" y="55" width="160" height="305" rx="8" fill="none" stroke="#475569" stroke-width="3"/>
+                            <rect x="123" y="58" width="154" height="299" rx="6" fill="rgba(15,23,42,0.8)"/>
+
+                            <!-- Water Level -->
+                            <clipPath id="tankClip">
+                                <rect x="123" y="58" width="154" height="299" rx="6"/>
+                            </clipPath>
+                            <g clip-path="url(#tankClip)">
+                                <rect id="water-level" x="123" y="357" width="154" height="0" fill="url(#waterGradient)"/>
+                                <!-- Water wave animation -->
+                                <ellipse id="water-wave" cx="200" cy="357" rx="77" ry="3" fill="rgba(56,189,248,0.3)">
+                                    <animate attributeName="ry" values="2;4;2" dur="2s" repeatCount="indefinite"/>
+                                </ellipse>
+                            </g>
+
+                            <!-- Tank Markings -->
+                            <line x1="118" y1="357" x2="125" y2="357" stroke="#475569" stroke-width="1"/>
+                            <text x="112" y="360" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">0</text>
+
+                            <line x1="118" y1="282" x2="125" y2="282" stroke="#475569" stroke-width="1"/>
+                            <text x="112" y="285" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">2.5</text>
+
+                            <line x1="118" y1="207" x2="125" y2="207" stroke="#475569" stroke-width="1"/>
+                            <text x="112" y="210" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">5</text>
+
+                            <line x1="118" y1="133" x2="125" y2="133" stroke="#475569" stroke-width="1"/>
+                            <text x="112" y="136" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">7.5</text>
+
+                            <line x1="118" y1="121" x2="125" y2="121" stroke="#475569" stroke-width="1"/>
+                            <text x="112" y="125" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">10</text>
+
+                            <!-- Setpoint Line -->
+                            <line id="setpoint-line" x1="120" y1="237" x2="280" y2="237" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6,4" filter="url(#glow)"/>
+                            <text x="285" y="240" fill="#fbbf24" font-size="10" font-family="Inter, sans-serif" font-weight="600">SP</text>
+
+                            <!-- Outflow Pipe (bottom) -->
+                            <rect x="200" y="358" width="80" height="16" rx="3" fill="url(#pipeGradient)" stroke="#334155" stroke-width="1"/>
+                            <!-- Outflow arrow -->
+                            <g id="outflow-arrow">
+                                <line x1="255" y1="366" x2="275" y2="366" stroke="#f87171" stroke-width="3" stroke-linecap="round"/>
+                                <polygon points="273,360 283,366 273,372" fill="#f87171"/>
+                            </g>
+                            <text x="310" y="370" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif">Outflow</text>
+
+                            <!-- Level Sensor -->
+                            <circle cx="280" cy="200" r="8" fill="none" stroke="#10b981" stroke-width="2"/>
+                            <circle cx="280" cy="200" r="3" fill="#10b981"/>
+                            <line x1="288" y1="200" x2="310" y2="200" stroke="#10b981" stroke-width="1" stroke-dasharray="3,2"/>
+                            <text x="315" y="203" fill="#10b981" font-size="9" font-family="Inter, sans-serif" font-weight="500">Sensor</text>
+
+                            <!-- PID Controller Box -->
+                            <rect x="10" y="300" width="70" height="50" rx="6" fill="#1e293b" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="45" y="318" fill="#0ea5e9" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">PID</text>
+                            <text x="45" y="336" fill="#94a3b8" font-size="8" font-family="Inter, sans-serif" text-anchor="middle">Controller</text>
+
+                            <!-- Signal lines -->
+                            <path d="M 280 200 L 320 200 L 320 290 L 80 290 L 80 310" stroke="#10b981" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+                            <path d="M 45 350 L 45 370 L 200 370 L 200 358" stroke="#0ea5e9" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+
+                            <!-- Tank Label -->
+                            <text x="200" y="415" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="500">Process Tank (A = <tspan id="svg-tank-area">2.0</tspan> m²)</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Charts: each MV directly below its PV -->
+                <div class="chart-container">
+                    <div class="chart-caption"><span class="tag-pv">PV</span> Tank Level h — process variable</div>
+                    <div id="chart-tank" class="chart-plot stacked"></div>
+                    <div class="chart-caption"><span class="tag-mv">MV</span> Inflow q<sub>in</sub> — manipulated variable</div>
+                    <div id="chart-control" class="chart-plot stacked"></div>
+                    <div class="chart-caption"><span class="tag-err">e</span> Error (SP − h)</div>
+                    <div id="chart-error" class="chart-plot stacked"></div>
+                </div>
+
+                <!-- Metrics -->
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-label">Current Level</div>
+                        <div class="metric-value" id="metric-current">0.00 m</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Control Input</div>
+                        <div class="metric-value" id="metric-control">0.00</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Error</div>
+                        <div class="metric-value" id="metric-error">0.00 m</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Overshoot</div>
+                        <div class="metric-value" id="metric-overshoot">0%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Settling Time</div>
+                        <div class="metric-value" id="metric-settling">— s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">SSE</div>
+                        <div class="metric-value" id="metric-sse">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Parameter & equation reference -->
+        <section class="docs-section">
+            <h2 class="section-title">Parameters &amp; Equations</h2>
+            <p class="section-subtitle">Everything this simulation uses, written out for study.</p>
+            <div class="docs-grid">
+                <div class="docs-card">
+                    <h3>Process Model</h3>
+                    <div class="equation">
+                        <span class="eq-label">Tank mass balance</span>
+                        A · dh/dt = q<sub>in</sub> − h/R + d
+                        <span class="eq-note">h — level (m) · q<sub>in</sub> — inflow (m³/s) · A — cross-section (m²) · R — outflow resistance · d — disturbance inflow (m³/s)</span>
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Steady state (open loop)</span>
+                        h<sub>ss</sub> = R · (q<sub>in</sub> + d)
+                        <span class="eq-note">Time constant τ = A·R. With A = 2, R = 1 → τ = 2 s.</span>
+                    </div>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Controller — 2-DOF PID <span class="badge-eq two-dof">2-DOF</span></h3>
+                    <div class="equation">
+                        <span class="eq-label">Control law</span>
+                        q<sub>in</sub> = clamp[ K<sub>p</sub>(β·SP − h) + K<sub>i</sub>∫(SP − h)dt + K<sub>d</sub>(γ·dSP/dt − dh/dt), 0, 20 ]
+                        <span class="eq-note">error e = SP − h. Integral uses the full error; derivative uses the weighted setpoint minus the measurement.</span>
+                    </div>
+                    <p><strong>β (beta)</strong> is the proportional setpoint weight. β = 1 is a standard PID; β &lt; 1 reacts more gently to setpoint changes (less overshoot) while still rejecting disturbances at full gain.</p>
+                    <p><strong>γ (gamma)</strong> is the derivative setpoint weight. γ = 0 gives derivative-on-measurement (no derivative "kick"); γ = 1 gives derivative-on-error.</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Parameters</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
+                        <tr><td class="sym">A</td><td>Tank cross-section area</td><td class="def">2.0 m²</td></tr>
+                        <tr><td class="sym">R</td><td>Outflow resistance</td><td class="def">1.0</td></tr>
+                        <tr><td class="sym">SP</td><td>Level setpoint</td><td class="def">5.0 m</td></tr>
+                        <tr><td class="sym">d</td><td>Disturbance inflow</td><td class="def">0.0 m³/s</td></tr>
+                        <tr><td class="sym">K<sub>p</sub></td><td>Proportional gain</td><td class="def">2.0</td></tr>
+                        <tr><td class="sym">K<sub>i</sub></td><td>Integral gain</td><td class="def">0.5</td></tr>
+                        <tr><td class="sym">K<sub>d</sub></td><td>Derivative gain</td><td class="def">0.0</td></tr>
+                        <tr><td class="sym">q<sub>in</sub></td><td>Inflow (actuator, clamped)</td><td class="def">0–20 m³/s</td></tr>
+                    </table>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Controller Options</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
+                        <tr><td class="sym">β <span class="badge-eq two-dof">2-DOF</span></td><td>Proportional setpoint weight</td><td class="def">1.00</td></tr>
+                        <tr><td class="sym">γ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00</td></tr>
+                        <tr><td class="sym">α <span class="badge-eq filter">filter</span></td><td>Derivative filter (0 = off)</td><td class="def">0.00</td></tr>
+                        <tr><td class="sym">σ <span class="badge-eq noise">noise</span></td><td>PV sensor noise std-dev</td><td class="def">0.00 m</td></tr>
+                        <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup (clamping)</td><td class="def">on</td></tr>
+                    </table>
+                    <p><strong>Anti-reset windup (clamping):</strong> when the inflow saturates at its limit, conditional integration freezes the integral term so it cannot "wind up". Turn it off to see the slow recovery caused by windup.</p>
+                    <p><strong>PV noise:</strong> a zero-mean Gaussian noise of standard deviation σ is added to the measured level only (the true level stays clean): h<sub>meas</sub> = h + σ·N(0,1).</p>
+                    <p><strong>Derivative filter (α):</strong> the raw derivative is smoothed by D<sub>f</sub>[k] = α·D<sub>f</sub>[k−1] + (1−α)·D<sub>raw</sub>[k]. α = 0 disables filtering; larger α suppresses noise amplification at the cost of a small lag.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/pid-controller.js"></script>
+    <script src="js/pid-tank.js"></script>
+    <script>
+        // Mobile menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.getElementById('nav-links').classList.toggle('open');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>

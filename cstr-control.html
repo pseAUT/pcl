@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>CSTR Closed-Loop Control — PDC Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/icons.js"></script>
+    <script src="js/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <i class="fas fa-wave-square"></i>
+            <span>PDC Lab</span>
+        </a>
+        <div class="nav-institution">
+            <span class="ni-lab">PSE Lab</span>
+            <span class="ni-school">Amirkabir University of Technology (Tehran's Polytechnic)</span>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="pid-tank.html">PID Tank</a>
+            <a href="fopdt.html">FOPDT</a>
+            <a href="second-order.html">2nd Order</a>
+            <a href="cstr-runaway.html">CSTR</a>
+            <a href="cstr-control.html" class="active">CSTR Control</a>
+        </div>
+    </nav>
+
+    <div class="example-page">
+        <div class="page-header">
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <h1><i class="fas fa-sliders-h" style="color:#10b981;"></i> CSTR Closed-Loop Control</h1>
+            <p>Two decentralized PID controllers act on the exothermic CSTR simultaneously: the temperature loop manipulates coolant temperature T<sub>c</sub>, the concentration loop manipulates feed flow q.</p>
+            <div class="mode-tabs">
+                <a href="cstr-runaway.html" class="mode-tab"><i class="fas fa-fire"></i> Open Loop</a>
+                <a href="cstr-control.html" class="mode-tab active"><i class="fas fa-sliders-h"></i> Closed Loop</a>
+            </div>
+        </div>
+
+        <div class="page-layout">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <!-- Simulation Controls -->
+                <div class="panel-section">
+                    <h3>Simulation Control</h3>
+                    <div class="sim-controls">
+                        <button class="run-pause-btn" id="run-pause-btn">
+                            <i class="fas fa-play" id="run-pause-icon"></i>
+                            <span id="run-pause-text">Run</span>
+                        </button>
+                        <button class="reset-btn" id="reset-btn" title="Reset simulation">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </div>
+                    <div class="speed-controls">
+                        <label>Simulation Speed</label>
+                        <button class="speed-btn" data-speed="1">1x</button>
+                        <button class="speed-btn active" data-speed="5">5x</button>
+                        <button class="speed-btn" data-speed="20">20x</button>
+                        <button class="speed-btn" data-speed="100">100x</button>
+                    </div>
+                </div>
+
+                <!-- Temperature PID -->
+                <div class="panel-section pid-temp-section">
+                    <h3><i class="fas fa-thermometer-half"></i> Temperature PID → Coolant T<sub>c</sub></h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Kp</span>
+                            <span class="slider-value" id="t-kp-val">3.00</span>
+                        </div>
+                        <input type="range" id="t-kp" min="0" max="10" step="0.1" value="3">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Ki</span>
+                            <span class="slider-value" id="t-ki-val">1.00</span>
+                        </div>
+                        <input type="range" id="t-ki" min="0" max="5" step="0.05" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Kd</span>
+                            <span class="slider-value" id="t-kd-val">0.30</span>
+                        </div>
+                        <input type="range" id="t-kd" min="0" max="5" step="0.05" value="0.3">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Setpoint T (K)</span>
+                            <span class="slider-value" id="t-sp-val">350.0</span>
+                        </div>
+                        <input type="range" id="t-sp" min="300" max="400" step="1" value="350">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Coolant Bias T<sub>c0</sub> (K)</span>
+                            <span class="slider-value" id="tc-bias-val">300</span>
+                        </div>
+                        <input type="range" id="tc-bias" min="250" max="400" step="1" value="300">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">β — P Setpoint Weight</span>
+                            <span class="slider-value" id="t-beta-val">1.00</span>
+                        </div>
+                        <input type="range" id="t-beta" min="0" max="1" step="0.05" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">γ — D Setpoint Weight</span>
+                            <span class="slider-value" id="t-gamma-val">0.00</span>
+                        </div>
+                        <input type="range" id="t-gamma" min="0" max="1" step="0.05" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">PV Noise σ (K)</span>
+                            <span class="slider-value" id="noise-t-val">0.000</span>
+                        </div>
+                        <input type="range" id="noise-t" min="0" max="5" step="0.001" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">α — D Filter (0 = off)</span>
+                            <span class="slider-value" id="t-alpha-val">0.00</span>
+                        </div>
+                        <input type="range" id="t-alpha" min="0" max="0.95" step="0.05" value="0">
+                    </div>
+                    <label class="check-row">
+                        <input type="checkbox" id="t-aw" checked>
+                        <span>Anti-reset windup (clamping)</span>
+                    </label>
+                </div>
+
+                <!-- Concentration PID -->
+                <div class="panel-section pid-conc-section">
+                    <h3><i class="fas fa-flask"></i> Concentration PID → Feed q</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Kp</span>
+                            <span class="slider-value" id="c-kp-val">30.0</span>
+                        </div>
+                        <input type="range" id="c-kp" min="0" max="100" step="1" value="30">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Ki</span>
+                            <span class="slider-value" id="c-ki-val">8.0</span>
+                        </div>
+                        <input type="range" id="c-ki" min="0" max="30" step="0.5" value="8">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Kd</span>
+                            <span class="slider-value" id="c-kd-val">1.50</span>
+                        </div>
+                        <input type="range" id="c-kd" min="0" max="10" step="0.1" value="1.5">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Setpoint C<sub>A</sub> (mol/L)</span>
+                            <span class="slider-value" id="c-sp-val">0.50</span>
+                        </div>
+                        <input type="range" id="c-sp" min="0.1" max="1" step="0.01" value="0.5">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Feed Bias q<sub>0</sub></span>
+                            <span class="slider-value" id="q-bias-val">100</span>
+                        </div>
+                        <input type="range" id="q-bias" min="10" max="300" step="1" value="100">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">β — P Setpoint Weight</span>
+                            <span class="slider-value" id="c-beta-val">1.00</span>
+                        </div>
+                        <input type="range" id="c-beta" min="0" max="1" step="0.05" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">γ — D Setpoint Weight</span>
+                            <span class="slider-value" id="c-gamma-val">0.00</span>
+                        </div>
+                        <input type="range" id="c-gamma" min="0" max="1" step="0.05" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">PV Noise σ (mol/L)</span>
+                            <span class="slider-value" id="noise-c-val">0.000</span>
+                        </div>
+                        <input type="range" id="noise-c" min="0" max="0.05" step="0.001" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">α — D Filter (0 = off)</span>
+                            <span class="slider-value" id="c-alpha-val">0.00</span>
+                        </div>
+                        <input type="range" id="c-alpha" min="0" max="0.95" step="0.05" value="0">
+                    </div>
+                    <label class="check-row">
+                        <input type="checkbox" id="c-aw" checked>
+                        <span>Anti-reset windup (clamping)</span>
+                    </label>
+                </div>
+
+                <!-- Disturbances -->
+                <div class="panel-section">
+                    <h3>Disturbances (live)</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Feed Conc. C<sub>Ain</sub></span>
+                            <span class="slider-value" id="cain-val">1.00</span>
+                        </div>
+                        <input type="range" id="cain" min="0.2" max="2" step="0.01" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Feed Temp T<sub>i</sub> (K)</span>
+                            <span class="slider-value" id="ti-val">350</span>
+                        </div>
+                        <input type="range" id="ti" min="280" max="450" step="1" value="350">
+                    </div>
+                    <p class="hint">Drag these while running to watch both loops reject the disturbance.</p>
+                </div>
+
+                <!-- Reactor Parameters -->
+                <div class="panel-section">
+                    <h3>Reactor Parameters</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">V — Volume (m³)</span>
+                            <span class="slider-value" id="vol-val">100</span>
+                        </div>
+                        <input type="range" id="vol" min="10" max="300" step="1" value="100">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">UA — Heat Transfer (W/K)</span>
+                            <span class="slider-value" id="ua-val">50.0k</span>
+                        </div>
+                        <input type="range" id="ua" min="0" max="200000" step="1000" value="50000">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">k₀ — Pre-exponential (1/s)</span>
+                            <span class="slider-value" id="k0-val">7.2e10</span>
+                        </div>
+                        <input type="range" id="k0" min="8" max="14" step="0.05" value="10.857">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">E/R — Activation (K)</span>
+                            <span class="slider-value" id="eoverr-val">8750</span>
+                        </div>
+                        <input type="range" id="eoverr" min="4000" max="15000" step="50" value="8750">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">ΔH<sub>r</sub></span>
+                            <span class="slider-value" id="dhr-val">-5.0e4</span>
+                        </div>
+                        <input type="range" id="dhr" min="-200000" max="-10000" step="1000" value="-50000">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">ρ — Density (kg/m³)</span>
+                            <span class="slider-value" id="rho-val">1000</span>
+                        </div>
+                        <input type="range" id="rho" min="500" max="2000" step="10" value="1000">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">C<sub>p</sub> — Heat Capacity</span>
+                            <span class="slider-value" id="cp-val">0.239</span>
+                        </div>
+                        <input type="range" id="cp" min="0.1" max="1" step="0.001" value="0.239">
+                    </div>
+                </div>
+
+                <!-- Initial Conditions -->
+                <div class="panel-section">
+                    <h3>Initial Conditions</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">C<sub>A0</sub> (mol/L)</span>
+                            <span class="slider-value" id="ca0-val">0.87725</span>
+                        </div>
+                        <input type="range" id="ca0" min="0" max="1.5" step="0.00001" value="0.87725">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">T<sub>0</sub> (K)</span>
+                            <span class="slider-value" id="t0-val">324.475</span>
+                        </div>
+                        <input type="range" id="t0" min="250" max="450" step="0.001" value="324.475">
+                    </div>
+                    <p class="hint">Changing an initial condition restarts the simulation.</p>
+                </div>
+
+                <!-- Model -->
+                <div class="panel-section">
+                    <div class="formula-box">
+                        <span class="formula-label">Two-Loop Control</span>
+                        T-loop: T<sub>c</sub> = PID<sub>T</sub>(T<sub>sp</sub> − T)<br>
+                        C<sub>A</sub>-loop: q = PID<sub>CA</sub>(C<sub>A,sp</sub> − C<sub>A</sub>)
+                    </div>
+                    <div class="info-box" style="margin-top:0.75rem;">
+                        <strong>Decentralized PID.</strong> The loops interact — coolant temperature and feed flow both affect T and C<sub>A</sub>. Try changing one setpoint and watch the other loop compensate.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side -->
+            <div>
+                <!-- Schematic -->
+                <div class="tank-schematic-container">
+                    <div class="tank-schematic-header">
+                        <h3>CSTR Control Schematic</h3>
+                        <div class="live-indicator">
+                            <span class="live-dot"></span>
+                            <span>LIVE</span>
+                        </div>
+                    </div>
+                    <div class="tank-svg-wrapper">
+                        <svg id="cstrc-svg" viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="jacketGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#334155" />
+                                    <stop offset="100%" style="stop-color:#1e293b" />
+                                </linearGradient>
+                                <linearGradient id="metalGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#475569" />
+                                    <stop offset="50%" style="stop-color:#64748b" />
+                                    <stop offset="100%" style="stop-color:#475569" />
+                                </linearGradient>
+                                <clipPath id="vesselClip2"><rect x="266" y="86" width="138" height="248" rx="8"/></clipPath>
+                                <marker id="arwRed" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#ef4444"/></marker>
+                                <marker id="arwBlue" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#0ea5e9"/></marker>
+                            </defs>
+
+                            <!-- ===== Signal lines (behind everything) ===== -->
+                            <!-- T measurement: reactor -> T PID -->
+                            <path d="M 250 180 L 60 180 L 60 296" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwRed)"/>
+                            <!-- T control: T PID -> coolant valve -->
+                            <path d="M 144 340 L 160 340 L 160 366 L 176 366" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwRed)"/>
+                            <!-- CA measurement: reactor -> CA PID -->
+                            <path d="M 420 180 L 560 180 L 560 160" fill="none" stroke="#0ea5e9" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwBlue)"/>
+                            <!-- CA control: CA PID -> feed valve -->
+                            <path d="M 496 123 L 480 123 L 480 44 L 357 44" fill="none" stroke="#0ea5e9" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwBlue)"/>
+
+                            <text x="66" y="174" fill="#f87171" font-size="11" font-family="Inter, sans-serif" font-weight="600">T</text>
+                            <text x="424" y="174" fill="#38bdf8" font-size="11" font-family="Inter, sans-serif" font-weight="600">CA</text>
+
+                            <!-- ===== PID blocks ===== -->
+                            <g>
+                                <rect x="20" y="296" width="124" height="74" rx="10" fill="#111827" stroke="#ef4444" stroke-width="2"/>
+                                <text x="82" y="318" fill="#f87171" font-size="9" font-family="Inter, sans-serif" text-anchor="middle" letter-spacing="1">TEMPERATURE</text>
+                                <text x="82" y="343" fill="#ef4444" font-size="16" font-family="Inter, sans-serif" text-anchor="middle" font-weight="800">PID</text>
+                                <text x="82" y="362" fill="#94a3b8" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">Tc out</text>
+                            </g>
+                            <g>
+                                <rect x="496" y="86" width="124" height="74" rx="10" fill="#111827" stroke="#0ea5e9" stroke-width="2"/>
+                                <text x="558" y="108" fill="#38bdf8" font-size="8.5" font-family="Inter, sans-serif" text-anchor="middle" letter-spacing="1">CONCENTRATION</text>
+                                <text x="558" y="133" fill="#0ea5e9" font-size="16" font-family="Inter, sans-serif" text-anchor="middle" font-weight="800">PID</text>
+                                <text x="558" y="152" fill="#94a3b8" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">q out</text>
+                            </g>
+
+                            <!-- ===== Reactor ===== -->
+                            <rect x="250" y="70" width="170" height="280" rx="18" fill="url(#jacketGrad2)" stroke="#475569" stroke-width="3"/>
+                            <rect x="266" y="86" width="138" height="248" rx="8" fill="rgba(15,23,42,0.9)" stroke="#64748b" stroke-width="2"/>
+
+                            <g clip-path="url(#vesselClip2)">
+                                <rect id="cstrc-liquid" x="266" y="86" width="138" height="248" fill="#0ea5e9" opacity="0.75"/>
+                                <ellipse cx="335" cy="86" rx="69" ry="4" fill="rgba(255,255,255,0.18)">
+                                    <animate attributeName="ry" values="3;6;3" dur="2.2s" repeatCount="indefinite"/>
+                                </ellipse>
+                            </g>
+
+                            <!-- Agitator (blades sized so the sweep stays inside the vessel) -->
+                            <line x1="335" y1="86" x2="335" y2="285" stroke="#94a3b8" stroke-width="4"/>
+                            <g id="cstrc-agitator" clip-path="url(#vesselClip2)" style="transform-origin:335px 285px;">
+                                <line x1="302" y1="285" x2="368" y2="285" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round"/>
+                                <line x1="316" y1="269" x2="354" y2="269" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
+                            </g>
+                            <rect x="315" y="50" width="40" height="26" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                            <text x="335" y="68" fill="#94a3b8" font-size="12" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">M</text>
+                            <line x1="335" y1="76" x2="335" y2="86" stroke="#64748b" stroke-width="3"/>
+
+                            <!-- Feed pipe + valve (concentration loop) -->
+                            <rect x="327" y="16" width="16" height="70" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
+                            <rect id="cstrc-feed-valve" x="313" y="32" width="44" height="24" rx="4" fill="#0ea5e9" stroke="#0369a1" stroke-width="1.5" opacity="1"/>
+                            <text x="335" y="49" fill="#06283d" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">q</text>
+                            <text id="cstrc-q-label" x="362" y="30" fill="#0ea5e9" font-size="11" font-family="JetBrains Mono, monospace">q = 100</text>
+
+                            <!-- Coolant pipe + valve (temperature loop) -->
+                            <rect x="150" y="362" width="100" height="14" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
+                            <rect id="cstrc-coolant-valve" x="176" y="352" width="44" height="28" rx="4" fill="#38bdf8" stroke="#0369a1" stroke-width="1.5" opacity="1"/>
+                            <text x="198" y="372" fill="#06283d" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">Tc</text>
+                            <text id="cstrc-tc-label" x="150" y="404" fill="#38bdf8" font-size="11" font-family="JetBrains Mono, monospace">Tc = 300 K</text>
+
+                            <!-- Coolant outlet -->
+                            <rect x="420" y="110" width="40" height="14" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
+                            <polygon points="460,117 470,117 465,110" fill="#f59e0b"/>
+
+                            <!-- Product outlet -->
+                            <rect x="327" y="334" width="16" height="46" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
+                            <polygon points="325,378 335,392 345,378" fill="#f87171"/>
+
+                            <!-- State readout panel -->
+                            <g>
+                                <rect x="128" y="206" width="112" height="60" rx="8" fill="rgba(15,23,42,0.9)" stroke="#334155" stroke-width="1"/>
+                                <text x="184" y="230" fill="#f8fafc" font-size="12" font-family="JetBrains Mono, monospace" text-anchor="middle" id="cstrc-t-readout">T = 324.5 K</text>
+                                <text x="184" y="252" fill="#f8fafc" font-size="12" font-family="JetBrains Mono, monospace" text-anchor="middle" id="cstrc-ca-readout">CA = 0.877</text>
+                            </g>
+
+                            <!-- Legend -->
+                            <line x1="20" y1="392" x2="46" y2="392" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5,4"/>
+                            <text x="52" y="396" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif">measurement</text>
+                            <line x1="20" y1="408" x2="46" y2="408" stroke="#0ea5e9" stroke-width="1.6" stroke-dasharray="5,4"/>
+                            <text x="52" y="412" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif">control</text>
+                        </svg>
+                    </div>
+                    <div class="readout-row">
+                        <div class="readout-chip"><span class="rc-label">t</span><span class="rc-value" id="roc-time">0.0 s</span></div>
+                        <div class="readout-chip"><span class="rc-label">T</span><span class="rc-value" id="roc-t">324.5 K</span></div>
+                        <div class="readout-chip"><span class="rc-label">CA</span><span class="rc-value" id="roc-ca">0.877</span></div>
+                        <div class="readout-chip"><span class="rc-label">Tc</span><span class="rc-value" id="roc-tc">300.0 K</span></div>
+                        <div class="readout-chip"><span class="rc-label">q</span><span class="rc-value" id="roc-q">100.0</span></div>
+                        <div class="readout-chip"><span class="rc-label">eT</span><span class="rc-value" id="roc-et">+0.00 K</span></div>
+                        <div class="readout-chip"><span class="rc-label">eCA</span><span class="rc-value" id="roc-eca">+0.0000</span></div>
+                    </div>
+                </div>
+
+                <!-- Charts: each MV directly below its PV -->
+                <div class="chart-container">
+                    <div class="chart-caption"><span class="tag-pv">PV</span> Reactor Temperature T — controlled variable</div>
+                    <div id="chart-temp" class="chart-plot stacked"></div>
+                    <div class="chart-caption"><span class="tag-mv">MV</span> Coolant Temperature T<sub>c</sub> — manipulated by the T-loop</div>
+                    <div id="chart-tc" class="chart-plot stacked"></div>
+                    <div class="chart-caption"><span class="tag-pv">PV</span> Concentration C<sub>A</sub> — controlled variable</div>
+                    <div id="chart-conc" class="chart-plot stacked"></div>
+                    <div class="chart-caption"><span class="tag-mv">MV</span> Feed Flow q — manipulated by the C<sub>A</sub>-loop</div>
+                    <div id="chart-q" class="chart-plot stacked"></div>
+                </div>
+
+                <!-- Metrics -->
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-label">Temperature</div>
+                        <div class="metric-value" id="metric-t">324.5 K</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Concentration</div>
+                        <div class="metric-value" id="metric-ca">0.877</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Coolant Tc</div>
+                        <div class="metric-value" id="metric-tc">300.0 K</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Feed q</div>
+                        <div class="metric-value" id="metric-q">100.0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Error T</div>
+                        <div class="metric-value" id="metric-et">0.00 K</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Error CA</div>
+                        <div class="metric-value" id="metric-eca">0.0000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Parameter & equation reference -->
+        <section class="docs-section">
+            <h2 class="section-title">Parameters &amp; Equations</h2>
+            <p class="section-subtitle">The reactor model and both control loops, written out for study.</p>
+            <div class="docs-grid">
+                <div class="docs-card">
+                    <h3>Reactor Model</h3>
+                    <div class="equation">
+                        <span class="eq-label">Mole balance</span>
+                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> − C<sub>A</sub>) − k·C<sub>A</sub>
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Energy balance</span>
+                        dT/dt = (q/V)(T<sub>i</sub> − T) − ΔH<sub>r</sub>·k·C<sub>A</sub>/(ρC<sub>p</sub>) + UA(T<sub>c</sub> − T)/(ρC<sub>p</sub>V)
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Arrhenius rate</span>
+                        k = k<sub>0</sub>·exp(−(E/R)/T)
+                        <span class="eq-note">The exponential makes the system stiff: small T changes cause large rate changes.</span>
+                    </div>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Two Control Loops — 2-DOF PID <span class="badge-eq two-dof">2-DOF</span></h3>
+                    <div class="equation">
+                        <span class="eq-label">Temperature loop → coolant temperature</span>
+                        T<sub>c</sub> = clamp[ T<sub>c0</sub> + K<sub>p,T</sub>(β<sub>T</sub>·T<sub>sp</sub> − T) + K<sub>i,T</sub>∫(T<sub>sp</sub>−T)dt + K<sub>d,T</sub>(γ<sub>T</sub>·dT<sub>sp</sub>/dt − dT/dt), 250, 400 ]
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Concentration loop → feed flow</span>
+                        q = clamp[ q<sub>0</sub> + K<sub>p,CA</sub>(β<sub>CA</sub>·C<sub>A,sp</sub> − C<sub>A</sub>) + K<sub>i,CA</sub>∫(C<sub>A,sp</sub>−C<sub>A</sub>)dt + K<sub>d,CA</sub>(γ<sub>CA</sub>·dC<sub>A,sp</sub>/dt − dC<sub>A</sub>/dt), 10, 300 ]
+                        <span class="eq-note">The two loops interact: both T<sub>c</sub> and q affect T and C<sub>A</sub>.</span>
+                    </div>
+                    <p><strong>β (beta)</strong> — proportional setpoint weight · <strong>γ (gamma)</strong> — derivative setpoint weight. β = 1, γ = 0 is a standard PID with derivative-on-measurement.</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Reactor Parameters</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
+                        <tr><td class="sym">C<sub>Ain</sub></td><td>Feed concentration</td><td class="def">1.00 mol/L</td></tr>
+                        <tr><td class="sym">V</td><td>Reactor volume</td><td class="def">100 m³</td></tr>
+                        <tr><td class="sym">T<sub>i</sub></td><td>Feed temperature</td><td class="def">350 K</td></tr>
+                        <tr><td class="sym">UA</td><td>Heat-transfer coefficient</td><td class="def">5.0×10⁴ W/K</td></tr>
+                        <tr><td class="sym">k<sub>0</sub></td><td>Pre-exponential factor</td><td class="def">7.2×10¹⁰ 1/s</td></tr>
+                        <tr><td class="sym">E/R</td><td>Activation temperature</td><td class="def">8750 K</td></tr>
+                        <tr><td class="sym">ΔH<sub>r</sub></td><td>Heat of reaction</td><td class="def">−5.0×10⁴</td></tr>
+                        <tr><td class="sym">ρ</td><td>Density</td><td class="def">1000 kg/m³</td></tr>
+                        <tr><td class="sym">C<sub>p</sub></td><td>Heat capacity</td><td class="def">0.239</td></tr>
+                        <tr><td class="sym">T<sub>c0</sub>, q<sub>0</sub></td><td>Controller bias (operating point)</td><td class="def">300 K, 100</td></tr>
+                    </table>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Controller Parameters &amp; Options</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default (T / C<sub>A</sub>)</th></tr>
+                        <tr><td class="sym">K<sub>p</sub></td><td>Proportional gain</td><td class="def">3 / 30</td></tr>
+                        <tr><td class="sym">K<sub>i</sub></td><td>Integral gain</td><td class="def">1 / 8</td></tr>
+                        <tr><td class="sym">K<sub>d</sub></td><td>Derivative gain</td><td class="def">0.3 / 1.5</td></tr>
+                        <tr><td class="sym">T<sub>sp</sub>, C<sub>A,sp</sub></td><td>Setpoints</td><td class="def">350 K / 0.5 mol/L</td></tr>
+                        <tr><td class="sym">β <span class="badge-eq two-dof">2-DOF</span></td><td>Proportional setpoint weight</td><td class="def">1.00 / 1.00</td></tr>
+                        <tr><td class="sym">γ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00 / 0.00</td></tr>
+                        <tr><td class="sym">α <span class="badge-eq filter">filter</span></td><td>Derivative filter (0 = off)</td><td class="def">0.00 / 0.00</td></tr>
+                        <tr><td class="sym">σ <span class="badge-eq noise">noise</span></td><td>PV sensor noise std-dev</td><td class="def">0 K / 0 mol/L</td></tr>
+                        <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup (clamping)</td><td class="def">on / on</td></tr>
+                    </table>
+                    <p><strong>PV noise:</strong> each measurement is corrupted by zero-mean Gaussian noise: T<sub>meas</sub> = T + σ<sub>T</sub>·N(0,1) and C<sub>A,meas</sub> = C<sub>A</sub> + σ<sub>CA</sub>·N(0,1). The reactor state itself remains noise-free.</p>
+                    <p><strong>Anti-reset windup:</strong> when an actuator saturates, conditional integration freezes the integral so it cannot accumulate a large error. Disable it to observe windup.</p>
+                    <p><strong>Derivative filter (α):</strong> D<sub>f</sub>[k] = α·D<sub>f</sub>[k−1] + (1−α)·D<sub>raw</sub>[k]. α = 0 disables filtering; larger α smooths the derivative (useful with noisy sensors).</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/pid-controller.js"></script>
+    <script src="js/cstr-control.js"></script>
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.getElementById('nav-links').classList.toggle('open');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>

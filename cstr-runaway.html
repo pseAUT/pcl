@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>CSTR Thermal Runaway — PDC Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/icons.js"></script>
+    <script src="js/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <i class="fas fa-wave-square"></i>
+            <span>PDC Lab</span>
+        </a>
+        <div class="nav-institution">
+            <span class="ni-lab">PSE Lab</span>
+            <span class="ni-school">Amirkabir University of Technology (Tehran's Polytechnic)</span>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="pid-tank.html">PID Tank</a>
+            <a href="fopdt.html">FOPDT</a>
+            <a href="second-order.html">2nd Order</a>
+            <a href="cstr-runaway.html" class="active">CSTR</a>
+            <a href="cstr-control.html">CSTR Control</a>
+        </div>
+    </nav>
+
+    <div class="example-page">
+        <div class="page-header">
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <h1><i class="fas fa-fire" style="color:#ef4444;"></i> CSTR Thermal Runaway</h1>
+            <p>Continuous stirred-tank reactor with an exothermic reaction. Tune the kinetics, feed and cooling, set the simulation time, then solve the stiff ODE system with the built-in adaptive solver.</p>
+            <div class="mode-tabs">
+                <a href="cstr-runaway.html" class="mode-tab active"><i class="fas fa-fire"></i> Open Loop</a>
+                <a href="cstr-control.html" class="mode-tab"><i class="fas fa-sliders-h"></i> Closed Loop</a>
+            </div>
+        </div>
+
+        <div class="page-layout">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <!-- Simulation Controls -->
+                <div class="panel-section">
+                    <h3>Simulation Control</h3>
+                    <div class="sim-controls">
+                        <button class="run-pause-btn" id="run-pause-btn">
+                            <i class="fas fa-play" id="run-pause-icon"></i>
+                            <span id="run-pause-text">Play</span>
+                        </button>
+                        <button class="reset-btn" id="reset-btn" title="Reset playback">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </div>
+                    <div class="speed-controls">
+                        <label>Playback Speed</label>
+                        <button class="speed-btn" data-speed="1">1x</button>
+                        <button class="speed-btn active" data-speed="5">5x</button>
+                        <button class="speed-btn" data-speed="20">20x</button>
+                        <button class="speed-btn" data-speed="100">100x</button>
+                    </div>
+                    <button class="solve-btn" id="solve-btn" style="margin-top:0.6rem;">
+                        <i class="fas fa-microchip"></i> Solve ODE System
+                    </button>
+                    <p class="hint">Playback replays the solved trajectory. Press <strong>Solve</strong> after changing parameters (they also auto-solve).</p>
+                </div>
+
+                <!-- Simulation Time & Solver -->
+                <div class="panel-section">
+                    <h3>Simulation Time &amp; Solver</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">t_end — Simulation Time (s)</span>
+                            <span class="slider-value" id="tend-val">20.0</span>
+                        </div>
+                        <input type="range" id="tend" min="1" max="60" step="0.5" value="20">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Method</span>
+                        </div>
+                        <select id="method" class="select-control">
+                            <option value="auto" selected>Auto (adaptive, detects stiffness)</option>
+                            <option value="rk45">RK45 — explicit (non-stiff)</option>
+                            <option value="trbdf2">TR-BDF2 — implicit (stiff)</option>
+                        </select>
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Accuracy (tolerance)</span>
+                        </div>
+                        <select id="accuracy" class="select-control">
+                            <option value="fast">Fast · rtol 1e-4</option>
+                            <option value="balanced" selected>Balanced · rtol 1e-6</option>
+                            <option value="accurate">Accurate · rtol 1e-7</option>
+                        </select>
+                    </div>
+                    <div class="solver-status" id="solver-status">Ready.</div>
+                </div>
+
+                <!-- Reaction / Reactor Parameters -->
+                <div class="panel-section">
+                    <h3>Reactor Parameters</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">C<sub>Ain</sub> — Feed Conc.</span>
+                            <span class="slider-value" id="cain-val">1.00</span>
+                        </div>
+                        <input type="range" id="cain" min="0.2" max="2" step="0.01" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">q — Flow (m³/s)</span>
+                            <span class="slider-value" id="q-val">100</span>
+                        </div>
+                        <input type="range" id="q" min="10" max="300" step="1" value="100">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">V — Volume (m³)</span>
+                            <span class="slider-value" id="vol-val">100</span>
+                        </div>
+                        <input type="range" id="vol" min="10" max="300" step="1" value="100">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">T<sub>i</sub> — Feed Temp (K)</span>
+                            <span class="slider-value" id="ti-val">350</span>
+                        </div>
+                        <input type="range" id="ti" min="280" max="450" step="1" value="350">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">T<sub>c</sub> — Coolant Temp (K)</span>
+                            <span class="slider-value" id="tc-val">305</span>
+                        </div>
+                        <input type="range" id="tc" min="250" max="450" step="1" value="305">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">UA — Heat Transfer (W/K)</span>
+                            <span class="slider-value" id="ua-val">50.0k</span>
+                        </div>
+                        <input type="range" id="ua" min="0" max="200000" step="1000" value="50000">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">k₀ — Pre-exponential (1/s)</span>
+                            <span class="slider-value" id="k0-val">7.2e10</span>
+                        </div>
+                        <input type="range" id="k0" min="8" max="14" step="0.05" value="10.857">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">E/R — Activation (K)</span>
+                            <span class="slider-value" id="eoverr-val">8750</span>
+                        </div>
+                        <input type="range" id="eoverr" min="4000" max="15000" step="50" value="8750">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">ΔH<sub>r</sub> — Heat of Reaction</span>
+                            <span class="slider-value" id="dhr-val">-5.0e4</span>
+                        </div>
+                        <input type="range" id="dhr" min="-200000" max="-10000" step="1000" value="-50000">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">ρ — Density (kg/m³)</span>
+                            <span class="slider-value" id="rho-val">1000</span>
+                        </div>
+                        <input type="range" id="rho" min="500" max="2000" step="10" value="1000">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">C<sub>p</sub> — Heat Capacity</span>
+                            <span class="slider-value" id="cp-val">0.239</span>
+                        </div>
+                        <input type="range" id="cp" min="0.1" max="1" step="0.001" value="0.239">
+                    </div>
+                </div>
+
+                <!-- Initial Conditions -->
+                <div class="panel-section">
+                    <h3>Initial Conditions</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">C<sub>A0</sub> (mol/L)</span>
+                            <input type="number" id="ca0-num" class="num-input" min="0" max="1.5" step="0.00001" value="0.87725">
+                        </div>
+                        <input type="range" id="ca0" min="0" max="1.5" step="0.00001" value="0.87725">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">T<sub>0</sub> (K)</span>
+                            <input type="number" id="t0-num" class="num-input" min="250" max="450" step="0.001" value="324.475">
+                        </div>
+                        <input type="range" id="t0" min="250" max="450" step="0.001" value="324.475">
+                    </div>
+                    <p class="hint">Initial state y(0) = [C<sub>A0</sub>, T<sub>0</sub>] passed to the ODE solver. Type an exact value or drag the slider.</p>
+                </div>
+
+                <!-- Model -->
+                <div class="panel-section">
+                    <div class="formula-box">
+                        <span class="formula-label">CSTR Mole &amp; Energy Balance</span>
+                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> − C<sub>A</sub>) − k·C<sub>A</sub><br>
+                        dT/dt = (q/V)(T<sub>i</sub> − T) − ΔH<sub>r</sub>·k·C<sub>A</sub>/(ρC<sub>p</sub>)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ UA(T<sub>c</sub> − T)/(ρC<sub>p</sub>V)<br>
+                        k = k₀·exp(−E/R·T)
+                    </div>
+                    <div class="info-box" style="margin-top:0.75rem;">
+                        <strong>Stiff system.</strong> The Arrhenius term makes the Jacobian grow by orders of magnitude during ignition, so an L-stable implicit method is required.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Schematic + Charts -->
+            <div>
+                <!-- CSTR Schematic -->
+                <div class="tank-schematic-container">
+                    <div class="tank-schematic-header">
+                        <h3>CSTR Schematic</h3>
+                        <div class="live-indicator">
+                            <span class="live-dot"></span>
+                            <span id="live-label">LIVE</span>
+                        </div>
+                    </div>
+                    <div class="tank-svg-wrapper">
+                        <svg id="cstr-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="jacketGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#334155" />
+                                    <stop offset="100%" style="stop-color:#1e293b" />
+                                </linearGradient>
+                                <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#475569" />
+                                    <stop offset="50%" style="stop-color:#64748b" />
+                                    <stop offset="100%" style="stop-color:#475569" />
+                                </linearGradient>
+                                <clipPath id="vesselClip">
+                                    <rect x="120" y="80" width="160" height="250" rx="8"/>
+                                </clipPath>
+                            </defs>
+
+                            <!-- Jacket -->
+                            <rect x="104" y="64" width="192" height="282" rx="18" fill="url(#jacketGrad)" stroke="#475569" stroke-width="3"/>
+                            <!-- Vessel inner -->
+                            <rect x="120" y="80" width="160" height="250" rx="8" fill="rgba(15,23,42,0.9)" stroke="#64748b" stroke-width="2"/>
+
+                            <!-- Liquid -->
+                            <g clip-path="url(#vesselClip)">
+                                <rect id="cstr-liquid" x="120" y="80" width="160" height="250" fill="#0ea5e9" opacity="0.75"/>
+                                <ellipse id="cstr-liquid-wave" cx="200" cy="80" rx="80" ry="4" fill="rgba(255,255,255,0.18)">
+                                    <animate attributeName="ry" values="3;6;3" dur="2.2s" repeatCount="indefinite"/>
+                                </ellipse>
+                            </g>
+
+                            <!-- Agitator (blades sized so the sweep stays inside the vessel) -->
+                            <line x1="200" y1="80" x2="200" y2="285" stroke="#94a3b8" stroke-width="4"/>
+                            <g id="cstr-agitator" clip-path="url(#vesselClip)" style="transform-origin:200px 285px;">
+                                <line x1="160" y1="285" x2="240" y2="285" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round"/>
+                                <line x1="175" y1="269" x2="225" y2="269" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
+                            </g>
+                            <!-- Motor -->
+                            <rect x="180" y="44" width="40" height="26" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                            <text x="200" y="62" fill="#94a3b8" font-size="12" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">M</text>
+                            <line x1="200" y1="70" x2="200" y2="80" stroke="#64748b" stroke-width="3"/>
+
+                            <!-- Feed pipe -->
+                            <rect x="20" y="112" width="90" height="16" rx="3" fill="url(#metalGrad)" stroke="#334155" stroke-width="1"/>
+                            <polygon points="100,110 112,120 100,130" fill="#0ea5e9"/>
+                            <text x="24" y="104" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif">Feed · C<tspan baseline-shift="sub" font-size="8">Ain</tspan>, T<tspan baseline-shift="sub" font-size="8">i</tspan></text>
+
+                            <!-- Outlet pipe -->
+                            <rect x="192" y="346" width="16" height="40" rx="3" fill="url(#metalGrad)" stroke="#334155" stroke-width="1"/>
+                            <polygon points="190,384 200,396 210,384" fill="#f87171"/>
+                            <text x="216" y="380" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif">Product</text>
+
+                            <!-- Coolant -->
+                            <rect x="72" y="300" width="32" height="14" rx="3" fill="url(#metalGrad)" stroke="#334155" stroke-width="1"/>
+                            <polygon points="70,307 60,300 70,293" fill="#38bdf8"/>
+                            <text x="30" y="330" fill="#38bdf8" font-size="10" font-family="Inter, sans-serif">Coolant in</text>
+
+                            <rect x="296" y="96" width="32" height="14" rx="3" fill="url(#metalGrad)" stroke="#334155" stroke-width="1"/>
+                            <polygon points="330,103 340,96 330,89" fill="#f59e0b"/>
+                            <text x="300" y="86" fill="#f59e0b" font-size="10" font-family="Inter, sans-serif">out</text>
+
+                            <!-- Thermometer -->
+                            <rect x="372" y="90" width="26" height="230" rx="13" fill="rgba(15,23,42,0.85)" stroke="#475569" stroke-width="2"/>
+                            <rect id="cstr-thermo-fill" x="378" y="310" width="14" height="0" rx="7" fill="#ef4444"/>
+                            <circle id="cstr-thermo-bulb" cx="385" cy="334" r="14" fill="#ef4444" stroke="#475569" stroke-width="2"/>
+                            <text x="385" y="76" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">T (K)</text>
+                            <text x="385" y="356" fill="#94a3b8" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="middle" id="cstr-thermo-label">324</text>
+
+                            <!-- Vessel state labels -->
+                            <text x="200" y="200" fill="#f8fafc" font-size="13" font-family="JetBrains Mono, monospace" text-anchor="middle" id="cstr-ca-readout">CA = 0.877</text>
+                            <text x="200" y="222" fill="#f8fafc" font-size="13" font-family="JetBrains Mono, monospace" text-anchor="middle" id="cstr-t-readout">T = 324.5 K</text>
+                        </svg>
+                    </div>
+                    <!-- Live readouts -->
+                    <div class="readout-row">
+                        <div class="readout-chip"><span class="rc-label">t</span><span class="rc-value" id="ro-time">0.00 s</span></div>
+                        <div class="readout-chip"><span class="rc-label">C<sub>A</sub></span><span class="rc-value" id="ro-ca">0.877</span></div>
+                        <div class="readout-chip"><span class="rc-label">T</span><span class="rc-value" id="ro-t">324.5 K</span></div>
+                        <div class="readout-chip"><span class="rc-label">dT/dt</span><span class="rc-value" id="ro-rate">0.0 K/s</span></div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="chart-container">
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" data-chart="temp">Temperature</button>
+                        <button class="chart-tab" data-chart="conc">Concentration</button>
+                        <button class="chart-tab" data-chart="phase">Phase Plane</button>
+                    </div>
+                    <div id="chart-temp" class="chart-plot"></div>
+                    <div id="chart-conc" class="chart-plot" style="display:none;"></div>
+                    <div id="chart-phase" class="chart-plot" style="display:none;"></div>
+                </div>
+
+                <!-- Metrics -->
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-label">Peak Temp</div>
+                        <div class="metric-value" id="metric-peak-t">— K</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Time to Peak</div>
+                        <div class="metric-value" id="metric-peak-time">— s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Final T</div>
+                        <div class="metric-value" id="metric-final-t">— K</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Final C<sub>A</sub></div>
+                        <div class="metric-value" id="metric-final-ca">—</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Conversion</div>
+                        <div class="metric-value" id="metric-conv">— %</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Max dT/dt</div>
+                        <div class="metric-value" id="metric-rate">— K/s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Solver</div>
+                        <div class="metric-value" id="metric-method">—</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Steps</div>
+                        <div class="metric-value" id="metric-steps">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Parameter & equation reference -->
+        <section class="docs-section">
+            <h2 class="section-title">Parameters &amp; Equations</h2>
+            <p class="section-subtitle">The open-loop reactor model and the stiff ODE solver used to integrate it.</p>
+            <div class="docs-grid">
+                <div class="docs-card">
+                    <h3>Reactor Model</h3>
+                    <div class="equation">
+                        <span class="eq-label">Mole balance</span>
+                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> − C<sub>A</sub>) − k·C<sub>A</sub>
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Energy balance</span>
+                        dT/dt = (q/V)(T<sub>i</sub> − T) − ΔH<sub>r</sub>·k·C<sub>A</sub>/(ρC<sub>p</sub>) + UA(T<sub>c</sub> − T)/(ρC<sub>p</sub>V)
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Arrhenius rate</span>
+                        k = k<sub>0</sub>·exp(−(E/R)/T)
+                        <span class="eq-note">The state is y = [C<sub>A</sub>, T]; this is a stiff, non-linear system.</span>
+                    </div>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Numerical Solver</h3>
+                    <div class="equation">
+                        <span class="eq-label">Adaptive integration of dy/dt = f(t, y)</span>
+                        RK45 — explicit Dormand–Prince (non-stiff)<br>
+                        TR-BDF2 — implicit, L-stable (stiff)<br>
+                        Auto — tries RK45, falls back to TR-BDF2 when stiff
+                        <span class="eq-note">Error is controlled by rtol/atol; the step size adapts to the local error.</span>
+                    </div>
+                    <p><strong>Accuracy:</strong> Fast (rtol 1e-4), Balanced (1e-6, default), Accurate (1e-7).</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Reactor Parameters</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
+                        <tr><td class="sym">C<sub>Ain</sub></td><td>Feed concentration</td><td class="def">1.00 mol/L</td></tr>
+                        <tr><td class="sym">q</td><td>Volumetric flow</td><td class="def">100 m³/s</td></tr>
+                        <tr><td class="sym">V</td><td>Reactor volume</td><td class="def">100 m³</td></tr>
+                        <tr><td class="sym">T<sub>i</sub></td><td>Feed temperature</td><td class="def">350 K</td></tr>
+                        <tr><td class="sym">T<sub>c</sub></td><td>Coolant temperature</td><td class="def">305 K</td></tr>
+                        <tr><td class="sym">UA</td><td>Heat-transfer coefficient</td><td class="def">5.0×10⁴ W/K</td></tr>
+                        <tr><td class="sym">k<sub>0</sub></td><td>Pre-exponential factor</td><td class="def">7.2×10¹⁰ 1/s</td></tr>
+                        <tr><td class="sym">E/R</td><td>Activation temperature</td><td class="def">8750 K</td></tr>
+                        <tr><td class="sym">ΔH<sub>r</sub></td><td>Heat of reaction</td><td class="def">−5.0×10⁴</td></tr>
+                        <tr><td class="sym">ρ</td><td>Density</td><td class="def">1000 kg/m³</td></tr>
+                        <tr><td class="sym">C<sub>p</sub></td><td>Heat capacity</td><td class="def">0.239</td></tr>
+                    </table>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Initial Conditions &amp; Simulation</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
+                        <tr><td class="sym">C<sub>A0</sub></td><td>Initial concentration</td><td class="def">0.87725 mol/L</td></tr>
+                        <tr><td class="sym">T<sub>0</sub></td><td>Initial temperature</td><td class="def">324.475 K</td></tr>
+                        <tr><td class="sym">t<sub>end</sub></td><td>Simulation time</td><td class="def">20 s</td></tr>
+                    </table>
+                    <p>Press <strong>Solve</strong> to integrate the system over [0, t<sub>end</sub>], then <strong>Run</strong> to replay the trajectory in real time.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/ode-solver.js?v=5"></script>
+    <script src="js/cstr-runaway.js?v=5"></script>
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.getElementById('nav-links').classList.toggle('open');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>
