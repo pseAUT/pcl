@@ -75,7 +75,7 @@ class PIDController {
             if (!satHigh && !satLow) {
                 this.integral = Math.max(this.iMin, Math.min(this.iMax, I_try));
             }
-            out = this.bias + P + this.ki * this.integral + D;
+            out = this.bias + P + this.integral + D;
         } else {
             this.integral = I_try;
         }
