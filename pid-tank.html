@@ -121,7 +121,7 @@
                     </div>
                     <label class="check-row">
                         <input type="checkbox" id="antiwindup" checked>
-                        <span>Anti-reset windup (clamping)</span>
+                        <span>Anti-reset windup (back-calculation)</span>
                     </label>
                     <p class="hint">β &lt; 1 softens the setpoint response (2-DOF). γ = 0 uses derivative-on-measurement. Turn windup off to see integral windup during saturation.</p>
                 </div>
@@ -188,7 +188,7 @@
                     <div class="formula-box">
                         <span class="formula-label">Transfer Function</span>
                         G(s) = 1 / (A·s + 1/R)<br>
-                        Controller: u = Kp·e + Ki·∫e dt + Kd·de/dt
+                        Controller: u = u<sub>bias</sub> + Kp(β·SP − h) + Ki·∫(SP − h)dt + Kd(γ·dSP/dt − dh/dt)
                     </div>
                 </div>
             </div>
@@ -278,7 +278,7 @@
 
                             <!-- Setpoint Line -->
                             <line id="setpoint-line" x1="120" y1="237" x2="280" y2="237" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6,4" filter="url(#glow)"/>
-                            <text x="285" y="240" fill="#fbbf24" font-size="10" font-family="Inter, sans-serif" font-weight="600">SP</text>
+                            <text id="setpoint-label" x="285" y="240" fill="#fbbf24" font-size="10" font-family="Inter, sans-serif" font-weight="600">SP</text>
 
                             <!-- Outflow Pipe (bottom) -->
                             <rect x="200" y="358" width="80" height="16" rx="3" fill="url(#pipeGradient)" stroke="#334155" stroke-width="1"/>
@@ -402,11 +402,11 @@
                         <tr><td class="sym">γ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00</td></tr>
                         <tr><td class="sym">α <span class="badge-eq filter">filter</span></td><td>Derivative filter (0 = off)</td><td class="def">0.00</td></tr>
                         <tr><td class="sym">σ <span class="badge-eq noise">noise</span></td><td>PV sensor noise std-dev</td><td class="def">0.00 m</td></tr>
-                        <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup (clamping)</td><td class="def">on</td></tr>
+                        <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup (back-calculation)</td><td class="def">on</td></tr>
                     </table>
-                    <p><strong>Anti-reset windup (clamping):</strong> when the inflow saturates at its limit, conditional integration freezes the integral term so it cannot "wind up". Turn it off to see the slow recovery caused by windup.</p>
+                    <p><strong>Anti-reset windup (back-calculation):</strong> when the inflow saturates at its limit, the integral is bled by the over-drive I ← I + (Δt/T<sub>t</sub>)(u<sub>sat</sub> − u), so it cannot "wind up". Turn it off to see the slow recovery caused by windup.</p>
                     <p><strong>PV noise:</strong> a zero-mean Gaussian noise of standard deviation σ is added to the measured level only (the true level stays clean): h<sub>meas</sub> = h + σ·N(0,1).</p>
-                    <p><strong>Derivative filter (α):</strong> the raw derivative is smoothed by D<sub>f</sub>[k] = α·D<sub>f</sub>[k−1] + (1−α)·D<sub>raw</sub>[k]. α = 0 disables filtering; larger α suppresses noise amplification at the cost of a small lag.</p>
+                    <p><strong>Derivative filter (α):</strong> the raw derivative is smoothed by a first-order filter D<sub>f</sub>[k] = a·D<sub>f</sub>[k−1] + (1−a)·D<sub>raw</sub>[k] with a = exp(−Δt/τ), where τ is a physical time constant set from α. α = 0 disables filtering; larger α suppresses noise amplification at the cost of a small lag.</p>
                 </div>
             </div>
         </section>

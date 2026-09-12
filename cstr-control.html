@@ -135,7 +135,7 @@
                     </div>
                     <label class="check-row">
                         <input type="checkbox" id="t-aw" checked>
-                        <span>Anti-reset windup (clamping)</span>
+                        <span>Anti-reset windup (back-calculation)</span>
                     </label>
                 </div>
 
@@ -207,7 +207,7 @@
                     </div>
                     <label class="check-row">
                         <input type="checkbox" id="c-aw" checked>
-                        <span>Anti-reset windup (clamping)</span>
+                        <span>Anti-reset windup (back-calculation)</span>
                     </label>
                 </div>
 
@@ -348,13 +348,13 @@
 
                             <!-- ===== Signal lines (behind everything) ===== -->
                             <!-- T measurement: reactor -> T PID -->
-                            <path d="M 250 180 L 60 180 L 60 296" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwRed)"/>
+                            <path d="M 250 180 L 60 180 L 60 290" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwRed)"/>
                             <!-- T control: T PID -> coolant valve -->
-                            <path d="M 144 340 L 160 340 L 160 366 L 176 366" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwRed)"/>
+                            <path d="M 144 340 L 160 340 L 160 330 L 170 330" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwRed)"/>
                             <!-- CA measurement: reactor -> CA PID -->
-                            <path d="M 420 180 L 560 180 L 560 160" fill="none" stroke="#0ea5e9" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwBlue)"/>
+                            <path d="M 420 180 L 560 180 L 560 166" fill="none" stroke="#0ea5e9" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwBlue)"/>
                             <!-- CA control: CA PID -> feed valve -->
-                            <path d="M 496 123 L 480 123 L 480 44 L 357 44" fill="none" stroke="#0ea5e9" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwBlue)"/>
+                            <path d="M 496 123 L 470 123 L 470 44 L 318 44" fill="none" stroke="#0ea5e9" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arwBlue)"/>
 
                             <text x="66" y="174" fill="#f87171" font-size="11" font-family="Inter, sans-serif" font-weight="600">T</text>
                             <text x="424" y="174" fill="#38bdf8" font-size="11" font-family="Inter, sans-serif" font-weight="600">CA</text>
@@ -394,25 +394,34 @@
                             <text x="335" y="68" fill="#94a3b8" font-size="12" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">M</text>
                             <line x1="335" y1="76" x2="335" y2="86" stroke="#64748b" stroke-width="3"/>
 
-                            <!-- Feed pipe + valve (concentration loop) -->
-                            <rect x="327" y="16" width="16" height="70" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
-                            <rect id="cstrc-feed-valve" x="313" y="32" width="44" height="24" rx="4" fill="#0ea5e9" stroke="#0369a1" stroke-width="1.5" opacity="1"/>
-                            <text x="335" y="49" fill="#06283d" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">q</text>
-                            <text id="cstrc-q-label" x="362" y="30" fill="#0ea5e9" font-size="11" font-family="JetBrains Mono, monospace">q = 100</text>
+                            <!-- ===== Process streams (drawn on top so the arrows stay visible) ===== -->
+                            <!-- Feed: q -> reactor top -->
+                            <rect x="282" y="16" width="16" height="70" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
+                            <line id="cstrc-feed-flow" x1="290" y1="12" x2="290" y2="78" stroke="#0ea5e9" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
+                            <polygon points="283,76 290,86 297,76" fill="#0ea5e9"/>
+                            <rect id="cstrc-feed-valve" x="268" y="30" width="44" height="26" rx="4" fill="#0ea5e9" stroke="#0369a1" stroke-width="1.5" opacity="1"/>
+                            <text x="290" y="48" fill="#06283d" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">q</text>
+                            <text id="cstrc-q-label" x="318" y="24" fill="#0ea5e9" font-size="11" font-family="JetBrains Mono, monospace">q = 100</text>
 
-                            <!-- Coolant pipe + valve (temperature loop) -->
-                            <rect x="150" y="362" width="100" height="14" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
-                            <rect id="cstrc-coolant-valve" x="176" y="352" width="44" height="28" rx="4" fill="#38bdf8" stroke="#0369a1" stroke-width="1.5" opacity="1"/>
-                            <text x="198" y="372" fill="#06283d" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">Tc</text>
-                            <text id="cstrc-tc-label" x="150" y="404" fill="#38bdf8" font-size="11" font-family="JetBrains Mono, monospace">Tc = 300 K</text>
+                            <!-- Coolant in: Tc -> jacket (bottom-left) -->
+                            <rect x="150" y="322" width="100" height="16" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
+                            <line id="cstrc-coolant-flow" x1="150" y1="330" x2="240" y2="330" stroke="#38bdf8" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
+                            <polygon points="238,323 250,330 238,337" fill="#38bdf8"/>
+                            <rect id="cstrc-coolant-valve" x="176" y="314" width="44" height="28" rx="4" fill="#38bdf8" stroke="#0369a1" stroke-width="1.5" opacity="1"/>
+                            <text x="198" y="334" fill="#06283d" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">Tc</text>
+                            <text id="cstrc-tc-label" x="150" y="356" fill="#38bdf8" font-size="11" font-family="JetBrains Mono, monospace">Tc = 300 K</text>
 
-                            <!-- Coolant outlet -->
-                            <rect x="420" y="110" width="40" height="14" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
-                            <polygon points="460,117 470,117 465,110" fill="#f59e0b"/>
+                            <!-- Coolant out: jacket -> out (top-right) -->
+                            <rect x="420" y="103" width="60" height="14" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
+                            <line id="cstrc-coolout-flow" x1="420" y1="110" x2="470" y2="110" stroke="#f59e0b" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
+                            <polygon points="468,103 480,110 468,117" fill="#f59e0b"/>
+                            <text x="420" y="94" fill="#fcd34d" font-size="10" font-family="Inter, sans-serif" font-weight="600">Coolant out</text>
 
-                            <!-- Product outlet -->
-                            <rect x="327" y="334" width="16" height="46" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
-                            <polygon points="325,378 335,392 345,378" fill="#f87171"/>
+                            <!-- Product out: reactor -> out (bottom) -->
+                            <rect x="327" y="334" width="16" height="56" rx="3" fill="url(#metalGrad2)" stroke="#334155" stroke-width="1"/>
+                            <line id="cstrc-product-flow" x1="335" y1="334" x2="335" y2="380" stroke="#f87171" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
+                            <polygon points="328,378 335,390 342,378" fill="#f87171"/>
+                            <text x="350" y="388" fill="#fca5a5" font-size="10" font-family="Inter, sans-serif" font-weight="600">Product out</text>
 
                             <!-- State readout panel -->
                             <g>
@@ -439,16 +448,24 @@
                     </div>
                 </div>
 
-                <!-- Charts: each MV directly below its PV -->
+                <!-- Charts: one tab per loop, each with its PV directly above its MV -->
                 <div class="chart-container">
-                    <div class="chart-caption"><span class="tag-pv">PV</span> Reactor Temperature T — controlled variable</div>
-                    <div id="chart-temp" class="chart-plot stacked"></div>
-                    <div class="chart-caption"><span class="tag-mv">MV</span> Coolant Temperature T<sub>c</sub> — manipulated by the T-loop</div>
-                    <div id="chart-tc" class="chart-plot stacked"></div>
-                    <div class="chart-caption"><span class="tag-pv">PV</span> Concentration C<sub>A</sub> — controlled variable</div>
-                    <div id="chart-conc" class="chart-plot stacked"></div>
-                    <div class="chart-caption"><span class="tag-mv">MV</span> Feed Flow q — manipulated by the C<sub>A</sub>-loop</div>
-                    <div id="chart-q" class="chart-plot stacked"></div>
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" data-chart="temp"><i class="fas fa-thermometer-half"></i> Temperature Loop</button>
+                        <button class="chart-tab" data-chart="conc"><i class="fas fa-flask"></i> Concentration Loop</button>
+                    </div>
+                    <div id="tab-temp">
+                        <div class="chart-caption"><span class="tag-pv">PV</span> Reactor Temperature T — controlled variable</div>
+                        <div id="chart-temp" class="chart-plot stacked"></div>
+                        <div class="chart-caption"><span class="tag-mv">MV</span> Coolant Temperature T<sub>c</sub> — manipulated by the T-loop</div>
+                        <div id="chart-tc" class="chart-plot stacked"></div>
+                    </div>
+                    <div id="tab-conc" style="display:none;">
+                        <div class="chart-caption"><span class="tag-pv">PV</span> Concentration C<sub>A</sub> — controlled variable</div>
+                        <div id="chart-conc" class="chart-plot stacked"></div>
+                        <div class="chart-caption"><span class="tag-mv">MV</span> Feed Flow q — manipulated by the C<sub>A</sub>-loop</div>
+                        <div id="chart-q" class="chart-plot stacked"></div>
+                    </div>
                 </div>
 
                 <!-- Metrics -->
@@ -513,6 +530,14 @@
                         q = clamp[ q<sub>0</sub> + K<sub>p,CA</sub>(β<sub>CA</sub>·C<sub>A,sp</sub> − C<sub>A</sub>) + K<sub>i,CA</sub>∫(C<sub>A,sp</sub>−C<sub>A</sub>)dt + K<sub>d,CA</sub>(γ<sub>CA</sub>·dC<sub>A,sp</sub>/dt − dC<sub>A</sub>/dt), 10, 300 ]
                         <span class="eq-note">The two loops interact: both T<sub>c</sub> and q affect T and C<sub>A</sub>.</span>
                     </div>
+                    <div class="equation">
+                        <span class="eq-label">Term contributions (each loop)</span>
+                        u = u<sub>bias</sub> + P + I + D<sub>f</sub><br>
+                        P = K<sub>p</sub>(β·SP − PV)<br>
+                        I = K<sub>i</sub>∫(SP − PV)dt<br>
+                        D<sub>f</sub>[k] = a·D<sub>f</sub>[k−1] + (1−a)·K<sub>d</sub>(γ·dSP/dt − dPV/dt), &nbsp; a = exp(−Δt/τ)
+                        <span class="eq-note">Only the sum u is limited by the actuator. When it saturates, anti-reset windup removes the over-drive from I so the integral cannot wind up.</span>
+                    </div>
                     <p><strong>β (beta)</strong> — proportional setpoint weight · <strong>γ (gamma)</strong> — derivative setpoint weight. β = 1, γ = 0 is a standard PID with derivative-on-measurement.</p>
                 </div>
 
@@ -545,11 +570,11 @@
                         <tr><td class="sym">γ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00 / 0.00</td></tr>
                         <tr><td class="sym">α <span class="badge-eq filter">filter</span></td><td>Derivative filter (0 = off)</td><td class="def">0.00 / 0.00</td></tr>
                         <tr><td class="sym">σ <span class="badge-eq noise">noise</span></td><td>PV sensor noise std-dev</td><td class="def">0 K / 0 mol/L</td></tr>
-                        <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup (clamping)</td><td class="def">on / on</td></tr>
+                        <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup (back-calculation)</td><td class="def">on / on</td></tr>
                     </table>
                     <p><strong>PV noise:</strong> each measurement is corrupted by zero-mean Gaussian noise: T<sub>meas</sub> = T + σ<sub>T</sub>·N(0,1) and C<sub>A,meas</sub> = C<sub>A</sub> + σ<sub>CA</sub>·N(0,1). The reactor state itself remains noise-free.</p>
-                    <p><strong>Anti-reset windup:</strong> when an actuator saturates, conditional integration freezes the integral so it cannot accumulate a large error. Disable it to observe windup.</p>
-                    <p><strong>Derivative filter (α):</strong> D<sub>f</sub>[k] = α·D<sub>f</sub>[k−1] + (1−α)·D<sub>raw</sub>[k]. α = 0 disables filtering; larger α smooths the derivative (useful with noisy sensors).</p>
+                    <p><strong>Anti-reset windup:</strong> when the actuator saturates, back-calculation bleeds the integral by the over-drive I ← I + (Δt/T<sub>t</sub>)(u<sub>sat</sub> − u), so I settles at the value that holds the actuator on its limit instead of accumulating error. It is robust to noisy PVs (unlike an error-sign freeze test), and the integral is always kept within its own limits. Disable it to observe windup.</p>
+                    <p><strong>Derivative filter (α):</strong> D<sub>f</sub>[k] = a·D<sub>f</sub>[k−1] + (1−a)·D<sub>raw</sub>[k] with a = exp(−Δt/τ) and τ set from α. α = 0 disables filtering; larger α smooths the derivative (useful with noisy sensors). Because the filter is defined by a physical time constant τ (not a fixed per-sample weight), the same α gives the same smoothing at every integration step.</p>
                 </div>
             </div>
         </section>

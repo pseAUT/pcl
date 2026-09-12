@@ -950,6 +950,28 @@ input[type="range"]::-moz-range-thumb {
     max-height: 300px;
 }
 
+/* Inflow / outflow arrows scale about their own centre instead of the SVG
+   origin (0,0), which made them fly across the schematic at low flow. */
+#inflow-arrow,
+#outflow-arrow {
+    transform-box: view-box;
+}
+#inflow-arrow { transform-origin: 59px 88px; }
+#outflow-arrow { transform-origin: 269px 366px; }
+
+/* Animated process streams on the CSTR schematics: the dashed centre-line
+   crawls in the direction of flow so every inflow/outflow is demonstrated. */
+.flow-line {
+    stroke-linecap: round;
+    animation: flow-dash 1s linear infinite;
+}
+@keyframes flow-dash {
+    to { stroke-dashoffset: -24; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .flow-line { animation: none; }
+}
+
 /* ============================================
    CHART CONTAINER
    ============================================ */
