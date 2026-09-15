@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Process Dynamics & Control — PDC Lab</title>
     <link rel="stylesheet" href="styles.css">
     <script src="js/icons.js"></script>
+    <script src="js/theme.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -28,6 +29,12 @@
             <a href="cstr-runaway.html">CSTR</a>
             <a href="cstr-control.html">CSTR Control</a>
         </div>
+        <button class="theme-toggle" id="theme-toggle" type="button"
+                role="switch" aria-checked="false"
+                aria-label="Switch to dark theme" title="Switch to dark theme">
+            <i class="fas fa-moon icon-moon" aria-hidden="true"></i>
+            <i class="fas fa-sun icon-sun" aria-hidden="true"></i>
+        </button>
     </nav>
 
     <!-- Centered hero header -->

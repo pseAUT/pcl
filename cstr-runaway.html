@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,7 @@
     <title>CSTR Thermal Runaway — PDC Lab</title>
     <link rel="stylesheet" href="styles.css">
     <script src="js/icons.js"></script>
+    <script src="js/theme.js"></script>
     <script src="js/chart.js"></script>
 </head>
 <body>
@@ -32,6 +33,12 @@
             <a href="cstr-runaway.html" class="active">CSTR</a>
             <a href="cstr-control.html">CSTR Control</a>
         </div>
+        <button class="theme-toggle" id="theme-toggle" type="button"
+                role="switch" aria-checked="false"
+                aria-label="Switch to dark theme" title="Switch to dark theme">
+            <i class="fas fa-moon icon-moon" aria-hidden="true"></i>
+            <i class="fas fa-sun icon-sun" aria-hidden="true"></i>
+        </button>
     </nav>
 
     <div class="example-page">
@@ -238,13 +245,13 @@
                         <svg id="cstr-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg">
                             <defs>
                                 <linearGradient id="jacketGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#334155" />
-                                    <stop offset="100%" style="stop-color:#1e293b" />
+                                    <stop offset="0%" style="stop-color:var(--jacket-1)" />
+                                    <stop offset="100%" style="stop-color:var(--jacket-2)" />
                                 </linearGradient>
                                 <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" style="stop-color:#475569" />
-                                    <stop offset="50%" style="stop-color:#64748b" />
-                                    <stop offset="100%" style="stop-color:#475569" />
+                                    <stop offset="0%" style="stop-color:var(--metal-1)" />
+                                    <stop offset="50%" style="stop-color:var(--metal-2)" />
+                                    <stop offset="100%" style="stop-color:var(--metal-1)" />
                                 </linearGradient>
                                 <clipPath id="vesselClip">
                                     <rect x="120" y="80" width="160" height="250" rx="8"/>
