@@ -81,11 +81,11 @@ class SecondOrderSimulator {
         const layout = {
             paper_bgcolor: 'transparent',
             plot_bgcolor: 'transparent',
-            font: { color: '#94a3b8', family: 'Inter' },
+            font: { family: 'Inter' },
             margin: { l: 50, r: 20, t: 10, b: 40 },
-            xaxis: { title: 'Time (s)', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            yaxis: { title: 'Output', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            xaxis: { title: 'Time (s)' },
+            yaxis: { title: 'Output' },
+            legend: { x: 0.99, y: 0.99 },
             hovermode: 'x unified',
             uirevision: 'true'
         };
@@ -183,11 +183,11 @@ class SecondOrderSimulator {
 
         const stepLayout = {
             paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-            font: { color: '#94a3b8', family: 'Inter' },
+            font: { family: 'Inter' },
             margin: { l: 50, r: 20, t: 10, b: 40 },
-            xaxis: { title: 'Time (s)', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            yaxis: { title: 'Output', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            xaxis: { title: 'Time (s)' },
+            yaxis: { title: 'Output' },
+            legend: { x: 0.99, y: 0.99 },
             hovermode: 'x unified', uirevision: 'true'
         };
 
@@ -201,14 +201,14 @@ class SecondOrderSimulator {
 
         Plotly.react('chart-poles', [
             { x: poleRe, y: poleIm, mode: 'markers', name: 'Poles', marker: { color: '#ef4444', size: 16, symbol: 'x', line: { width: 3, color: '#ef4444' } } },
-            { x: [minRe * 1.3, 1], y: [0, 0], mode: 'lines', line: { color: '#334155', width: 1, dash: 'dot' }, showlegend: false },
+            { x: [minRe * 1.3, 1], y: [0, 0], mode: 'lines', line: { color: '#64748b', width: 1, dash: 'dot' }, showlegend: false },
             { x: [0, 0], y: [-maxIm * 1.6, maxIm * 1.6], mode: 'lines', line: { color: '#ef4444', width: 1, dash: 'dash' }, showlegend: false }
         ], {
             ...stepLayout,
-            xaxis: { title: 'Real Axis (σ)', gridcolor: '#1e293b', zerolinecolor: '#334155', range: [minRe * 1.5, 1] },
-            yaxis: { title: 'Imaginary Axis (jω)', gridcolor: '#1e293b', zerolinecolor: '#334155', scaleanchor: 'x' },
+            xaxis: { title: 'Real Axis (σ)', range: [minRe * 1.5, 1] },
+            yaxis: { title: 'Imaginary Axis (jω)', scaleanchor: 'x' },
             showlegend: false,
-            annotations: [{ x: 0.5, y: 1.08, xref: 'paper', yref: 'paper', text: `Poles: ${poles.map(p => `${p.re.toFixed(2)}${p.im >= 0 ? '+' : ''}${p.im.toFixed(2)}j`).join(', ')}`, showarrow: false, font: { color: '#94a3b8', size: 11 } }]
+            annotations: [{ x: 0.5, y: 1.08, xref: 'paper', yref: 'paper', text: `Poles: ${poles.map(p => `${p.re.toFixed(2)}${p.im >= 0 ? '+' : ''}${p.im.toFixed(2)}j`).join(', ')}`, showarrow: false, font: { size: 11 } }]
         }, { responsive: true, displayModeBar: false });
 
         // Damping Comparison
@@ -221,7 +221,7 @@ class SecondOrderSimulator {
         dampData.push({ x: [0, T], y: [1, 1], name: 'Setpoint', line: { color: '#64748b', width: 1, dash: 'dash' } });
         Plotly.react('chart-damping', dampData, {
             ...stepLayout,
-            annotations: [{ x: 0.5, y: 1.08, xref: 'paper', yref: 'paper', text: `ωn = ${wn.toFixed(1)} rad/s — Effect of varying ζ`, showarrow: false, font: { color: '#94a3b8', size: 12 } }]
+            annotations: [{ x: 0.5, y: 1.08, xref: 'paper', yref: 'paper', text: `ωn = ${wn.toFixed(1)} rad/s — Effect of varying ζ`, showarrow: false, font: { size: 12 } }]
         }, { responsive: true, displayModeBar: false });
 
         // Metrics

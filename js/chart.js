@@ -35,6 +35,40 @@
         if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
         return e;
     }
+
+    /* ---- theme-aware chart chrome ----
+       Axis text, gridlines, legends and tooltips are chrome, not data, so they
+       come from the active theme's --chart-* tokens. Reading them at render
+       time (rather than caching) is what lets a repaint follow the theme
+       switch. The fallbacks are the dark values this library originally
+       hardcoded, used only if styles.css is missing. */
+    const CHROME_FALLBACK = {
+        'grid': '#1e293b',
+        'zero': '#334155',
+        'axis': '#94a3b8',
+        'legend-bg': 'rgba(30,41,59,0.85)',
+        'legend-border': '#334155',
+        'tooltip-bg': 'rgba(15,23,42,0.95)',
+        'tooltip-border': '#334155',
+        'tooltip-text': '#e2e8f0',
+        'hover-line': '#64748b',
+        'btn-bg': 'rgba(15,23,42,0.85)',
+        'btn-active-bg': 'rgba(56,189,248,0.25)'
+    };
+
+    function themeVar(name, fallback) {
+        try {
+            const v = getComputedStyle(document.documentElement)
+                .getPropertyValue(name).trim();
+            return v || fallback;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function chrome(name) {
+        return themeVar('--chart-' + name, CHROME_FALLBACK[name] || '');
+    }
     function getEl(div) { return typeof div === 'string' ? document.getElementById(div) : div; }
     function clone(o) { return o == null ? o : JSON.parse(JSON.stringify(o)); }
     function isNum(v) { return typeof v === 'number' && isFinite(v); }
@@ -222,7 +256,7 @@
             const height = this.layout.height || c.clientHeight || 350;
 
             const L = this.layout;
-            const font = Object.assign({ color: '#94a3b8', family: 'inherit', size: 11 }, L.font);
+            const font = Object.assign({ color: chrome('axis'), family: 'inherit', size: 11 }, L.font);
             const margin = Object.assign({ l: 55, r: (this._hasY2() ? 55 : 20), t: 12, b: 42 }, L.margin);
             const W = width, H = height;
             const x0 = margin.l, x1 = W - margin.r, y0 = margin.t, y1 = H - margin.b;
@@ -276,8 +310,8 @@
             svg.appendChild(gGrid); svg.appendChild(gShape); svg.appendChild(gData);
             svg.appendChild(gAxis); svg.appendChild(gAnno); svg.appendChild(gLegend);
 
-            const gridColor = xa.gridcolor || '#1e293b';
-            const zeroColor = xa.zerolinecolor || '#334155';
+            const gridColor = xa.gridcolor || chrome('grid');
+            const zeroColor = xa.zerolinecolor || chrome('zero');
 
             // ---- x grid + ticks ----
             const xTicks = niceTicks(xs.dmin, xs.dmax, Math.max(3, Math.floor((x1 - x0) / 90)));
@@ -420,7 +454,7 @@
             (L.annotations || []).forEach(a => {
                 const ax = a.xref === 'paper' ? x0 + (x1 - x0) * a.x : xs.to(a.x);
                 const ay = a.yref === 'paper' ? y0 + (y1 - y0) * a.y : ys.to(a.y);
-                const f = Object.assign({ color: '#94a3b8', size: 11 }, a.font);
+                const f = Object.assign({ color: chrome('axis'), size: 11 }, a.font);
                 const t = svgEl('text', { x: ax, y: ay, fill: f.color, 'font-size': f.size, 'text-anchor': 'middle', 'font-family': font.family });
                 t.textContent = a.text || '';
                 gAnno.appendChild(t);
@@ -436,7 +470,7 @@
                 let ly = y0 + 12 + yShift;
                 const boxW = 150;
                 const bx = rightSide ? x1 - boxW - 6 : x0 + 6;
-                const bg = svgEl('rect', { x: bx, y: y0 + 4 + yShift, width: boxW, height: 16 * legendItems.length + 8, rx: 6, fill: lg.bgcolor || 'rgba(30,41,59,0.85)', stroke: '#334155', 'stroke-width': 1 });
+                const bg = svgEl('rect', { x: bx, y: y0 + 4 + yShift, width: boxW, height: 16 * legendItems.length + 8, rx: 6, fill: lg.bgcolor || chrome('legend-bg'), stroke: chrome('legend-border'), 'stroke-width': 1 });
                 gLegend.appendChild(bg);
                 legendItems.forEach((it, i) => {
                     const yy = ly + 4 + i * 16;
@@ -461,8 +495,8 @@
             // ---- "Zoom to fit" toggle (top-right of the plot) ----
             const fitBtn = svgEl('g', { style: 'cursor:pointer' });
             const fbx = x1 - 46, fby = y0 + 2;
-            fitBtn.appendChild(svgEl('rect', { x: fbx, y: fby, width: 46, height: 17, rx: 5, fill: this.fit ? 'rgba(14,165,233,0.25)' : 'rgba(15,23,42,0.85)', stroke: this.fit ? '#0ea5e9' : '#334155', 'stroke-width': 1 }));
-            const ftx = svgEl('text', { x: fbx + 23, y: fby + 12.5, fill: this.fit ? '#38bdf8' : '#94a3b8', 'font-size': 9.5, 'text-anchor': 'middle', 'font-family': font.family });
+            fitBtn.appendChild(svgEl('rect', { x: fbx, y: fby, width: 46, height: 17, rx: 5, fill: this.fit ? chrome('btn-active-bg') : chrome('btn-bg'), stroke: this.fit ? chrome('axis') : chrome('legend-border'), 'stroke-width': 1 }));
+            const ftx = svgEl('text', { x: fbx + 23, y: fby + 12.5, fill: this.fit ? themeVar('--primary', '#38bdf8') : chrome('axis'), 'font-size': 9.5, 'text-anchor': 'middle', 'font-family': font.family });
             ftx.textContent = this.fit ? 'Auto' : 'Fit';
             fitBtn.appendChild(ftx);
             // Use pointerdown (fires on press) rather than click: the chart is
@@ -502,7 +536,7 @@
             if (!best) return;
             hi.hoverG.textContent = '';
             const px = hi.xs.to(best.x);
-            hi.hoverG.appendChild(svgEl('line', { x1: px, y1: hi.y0, x2: px, y2: hi.y1, stroke: '#64748b', 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
+            hi.hoverG.appendChild(svgEl('line', { x1: px, y1: hi.y0, x2: px, y2: hi.y1, stroke: chrome('hover-line'), 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
             // tooltip listing each trace at that x (if same length) or nearest
             const lines = [];
             this.data.forEach(tr => {
@@ -519,8 +553,8 @@
             const bw = 150, bh = 15 * lines.length + 22;
             let bx = px + 10; if (bx + bw > hi.x1) bx = px - bw - 10;
             const by = Math.max(hi.y0 + 4, Math.min(my - 10, hi.y1 - bh - 4));
-            hi.hoverG.appendChild(svgEl('rect', { x: bx, y: by, width: bw, height: bh, rx: 6, fill: 'rgba(15,23,42,0.95)', stroke: '#334155', 'stroke-width': 1 }));
-            const xt = svgEl('text', { x: bx + 8, y: by + 14, fill: '#e2e8f0', 'font-size': 10, 'font-family': hi.font.family });
+            hi.hoverG.appendChild(svgEl('rect', { x: bx, y: by, width: bw, height: bh, rx: 6, fill: chrome('tooltip-bg'), stroke: chrome('tooltip-border'), 'stroke-width': 1 }));
+            const xt = svgEl('text', { x: bx + 8, y: by + 14, fill: chrome('tooltip-text'), 'font-size': 10, 'font-family': hi.font.family });
             xt.textContent = 'x = ' + fmtNum(best.x);
             hi.hoverG.appendChild(xt);
             lines.forEach((ln, i) => {
@@ -560,6 +594,15 @@
         window.addEventListener('resize', () => {
             clearTimeout(rt);
             rt = setTimeout(() => charts.forEach(ch => ch.render()), 120);
+        });
+
+        // Repaint every chart with the new palette when the theme flips.
+        // theme.js fires this after it has written the data-theme attribute,
+        // so chrome() reads the tokens that are actually in effect.
+        document.addEventListener('themechange', () => {
+            charts.forEach(ch => {
+                if (ch.container && ch.container.clientWidth > 1) ch.render();
+            });
         });
     }
     global.Plotly = Plotly;

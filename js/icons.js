@@ -30,7 +30,10 @@
         'fa-check-circle': '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.5 14.5-5-5L7 10l3.5 3.5L17 7l1.5 1.5Z"/>',
         'fa-minus-circle': '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM7 11h10v2H7Z"/>',
         'fa-book': '<path d="M4 3h7a2 2 0 0 1 2 2v15a3 3 0 0 0-2.5-2H4Z"/><path d="M20 3h-7a2 2 0 0 0-2 2v15a3 3 0 0 1 2.5-2H20Z"/>',
-        'fa-external-link-alt': '<path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14Z"/><path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5v2H5v12h12v-5Z"/>'
+        'fa-external-link-alt': '<path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14Z"/><path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5v2H5v12h12v-5Z"/>',
+        /* theme switch */
+        'fa-sun': '<circle cx="12" cy="12" r="4.6" fill="none" stroke="black" stroke-width="2.2"/><path d="M12 1.6v2.7M12 19.7v2.7M1.6 12h2.7M19.7 12h2.7M4.6 4.6l1.9 1.9M17.5 17.5l1.9 1.9M19.4 4.6l-1.9 1.9M6.5 17.5l-1.9 1.9" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round"/>',
+        'fa-moon': '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>'
     };
 
     var css = '';

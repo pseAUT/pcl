@@ -368,11 +368,11 @@ class CSTRControlSimulator {
         return {
             paper_bgcolor: 'transparent',
             plot_bgcolor: 'transparent',
-            font: { color: '#94a3b8', family: 'Inter' },
+            font: { family: 'Inter' },
             margin: { l: 55, r: 55, t: 10, b: 40 },
-            xaxis: { title: xTitle, gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            yaxis: { title: yTitle, gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            xaxis: { title: xTitle },
+            yaxis: { title: yTitle },
+            legend: { x: 0.99, y: 0.99 },
             hovermode: 'x unified',
             uirevision: 'true'
         };

@@ -82,11 +82,11 @@ class FOPDTSimulator {
         const layout = {
             paper_bgcolor: 'transparent',
             plot_bgcolor: 'transparent',
-            font: { color: '#94a3b8', family: 'Inter' },
+            font: { family: 'Inter' },
             margin: { l: 50, r: 20, t: 10, b: 40 },
-            xaxis: { title: 'Time (s)', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            yaxis: { title: 'Output', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            xaxis: { title: 'Time (s)' },
+            yaxis: { title: 'Output' },
+            legend: { x: 0.99, y: 0.99 },
             hovermode: 'x unified',
             uirevision: 'true'
         };
@@ -159,11 +159,11 @@ class FOPDTSimulator {
 
         const stepLayout = {
             paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-            font: { color: '#94a3b8', family: 'Inter' },
+            font: { family: 'Inter' },
             margin: { l: 50, r: 20, t: 10, b: 40 },
-            xaxis: { title: 'Time (s)', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            yaxis: { title: 'Output', gridcolor: '#1e293b', zerolinecolor: '#334155' },
-            legend: { x: 0.99, y: 0.99, bgcolor: 'rgba(30,41,59,0.9)' },
+            xaxis: { title: 'Time (s)' },
+            yaxis: { title: 'Output' },
+            legend: { x: 0.99, y: 0.99 },
             hovermode: 'x unified', uirevision: 'true'
         };
 
@@ -183,7 +183,7 @@ class FOPDTSimulator {
             annotations: [{
                 x: 0.5, y: 1.05, xref: 'paper', yref: 'paper',
                 text: `Effect of varying τ (K=${K}, θ=${theta}s)`,
-                showarrow: false, font: { color: '#94a3b8', size: 12 }
+                showarrow: false, font: { size: 12 }
             }]
         }, { responsive: true, displayModeBar: false });
 
