@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split-Range Control — PDC Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/icons.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <i class="fas fa-wave-square"></i>
+            <span>PDC Lab</span>
+        </a>
+        <div class="nav-institution">
+            <span class="ni-lab">PSE Lab</span>
+            <span class="ni-school">Amirkabir University of Technology (Tehran's Polytechnic)</span>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="pid-tank.html">PID Tank</a>
+            <a href="fopdt.html">FOPDT</a>
+            <a href="second-order.html">2nd Order</a>
+            <a href="cstr-runaway.html">CSTR</a>
+            <a href="cstr-control.html">CSTR Control</a>
+            <a href="cascade-control.html">Cascade</a>
+            <a href="split-range-control.html" class="active">Split Range</a>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" type="button"
+                role="switch" aria-checked="false"
+                aria-label="Switch to dark theme" title="Switch to dark theme">
+            <i class="fas fa-moon icon-moon" aria-hidden="true"></i>
+            <i class="fas fa-sun icon-sun" aria-hidden="true"></i>
+        </button>
+    </nav>
+
+    <div class="example-page">
+        <div class="page-header">
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <h1><i class="fas fa-code-branch" style="color:var(--primary);"></i> Split-Range Control</h1>
+            <p>One controller output drives two opposing valves. Below the 50 % split the drain opens; above it the make-up opens. Both are shut exactly at the split point.</p>
+        </div>
+
+        <div class="page-layout">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <!-- Simulation Controls -->
+                <div class="panel-section">
+                    <h3>Simulation Control</h3>
+                    <div class="sim-controls">
+                        <button class="run-pause-btn" id="run-pause-btn">
+                            <i class="fas fa-play" id="run-pause-icon"></i>
+                            <span id="run-pause-text">Run</span>
+                        </button>
+                        <button class="reset-btn" id="reset-btn" title="Reset">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </div>
+                    <div class="speed-controls">
+                        <label>Simulation Speed</label>
+                        <button class="speed-btn" data-speed="1">1x</button>
+                        <button class="speed-btn active" data-speed="10">10x</button>
+                        <button class="speed-btn" data-speed="50">50x</button>
+                        <button class="speed-btn" data-speed="100">100x</button>
+                    </div>
+                    <div class="slider-group" style="margin-top:0.75rem;">
+                        <div class="slider-header">
+                            <span class="slider-label">t_end — Simulation Time (s)</span>
+                            <input type="number" id="tend" class="num-input" min="10" max="5000" step="10" value="600" inputmode="decimal">
+                        </div>
+                        <p class="hint">Type the simulation time and press <strong>Enter</strong> to apply.</p>
+                    </div>
+                </div>
+
+                <!-- PID Gains -->
+                <div class="panel-section">
+                    <h3>PID Controller Gains</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">K<sub>p</sub> — Proportional</span>
+                            <span class="slider-value" id="kp-val">0.5</span>
+                        </div>
+                        <input type="range" id="kp" min="0" max="30" step="0.5" value="0.5">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">K<sub>i</sub> — Integral</span>
+                            <span class="slider-value" id="ki-val">15.000</span>
+                        </div>
+                        <input type="range" id="ki" min="0" max="20" step="0.005" value="15">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">K<sub>d</sub> — Derivative</span>
+                            <span class="slider-value" id="kd-val">0.00</span>
+                        </div>
+                        <input type="range" id="kd" min="0" max="5" step="0.05" value="0">
+                    </div>
+                    <p class="hint">A level loop sits on an <strong>integrator</strong> (A·dh/dt = net flow), so a PI controller gives a double integrator. The defaults (K<sub>p</sub> = 0.5, K<sub>i</sub> = 15) are deliberately <strong>reset-heavy</strong>: τ<sub>i</sub> = K<sub>p</sub>/K<sub>i</sub> = 0.033 s gives ζ ≈ 0.007 — the loop overshoots hard and rings between the floor and the rim. Load <em>PI (tuned)</em> for a calm loop (ζ ≈ 0.6), or raise K<sub>p</sub> to damp the ring.</p>
+                </div>
+
+                <!-- Controller Options -->
+                <div class="panel-section">
+                    <h3>Controller Options</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">PV Noise σ (m)</span>
+                            <span class="slider-value" id="noise-val">0.000</span>
+                        </div>
+                        <input type="range" id="noise" min="0" max="0.2" step="0.001" value="0">
+                    </div>
+                    <label class="check-row">
+                        <input type="checkbox" id="antiwindup" checked>
+                        <span>Anti-reset windup (back-calculation)</span>
+                    </label>
+                    <p class="hint">Turn <strong>σ</strong> up with K<sub>d</sub> &gt; 0 to see why derivative action is avoided on a noisy level signal — the valve chatters.</p>
+                </div>
+
+                <!-- Split-Range Setup -->
+                <div class="panel-section">
+                    <h3>Split-Range Setup</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Level Setpoint (m)</span>
+                            <span class="slider-value" id="sp-val">13.0</span>
+                        </div>
+                        <input type="range" id="setpoint" min="1" max="15" step="0.1" value="13">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Drain Capacity K<sub>v1</sub></span>
+                            <span class="slider-value" id="kv1-val">1.10</span>
+                        </div>
+                        <input type="range" id="kv1" min="0.4" max="2.5" step="0.02" value="1.1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Make-up Capacity K<sub>v2</sub></span>
+                            <span class="slider-value" id="kv2-val">2.50</span>
+                        </div>
+                        <input type="range" id="kv2" min="0.4" max="4" step="0.02" value="2.5">
+                    </div>
+                    <p class="hint">The defaults are <strong>not</strong> authority-matched at the new setpoint: K<sub>v1</sub>√h<sub>sp</sub>/50 = 1.1·√13/50 ≈ 0.079 vs K<sub>v2</sub>/50 = 0.050 m³/s per %. The drain branch is ~1.6× stronger. To match them at h<sub>sp</sub> = 13 m, set K<sub>v2</sub> = K<sub>v1</sub>√13 ≈ 3.97, or K<sub>v1</sub> = K<sub>v2</sub>/√13 ≈ 0.69. Unbalanced branches behave differently in the two halves of the split.</p>
+                </div>
+
+                <!-- Drum & Load -->
+                <div class="panel-section">
+                    <h3>Surge Drum &amp; Load</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Drum Area A (m²)</span>
+                            <span class="slider-value" id="area-val">4.0</span>
+                        </div>
+                        <input type="range" id="tank-area" min="1" max="8" step="0.1" value="4.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Feed q<sub>f</sub> (m³/s)</span>
+                            <span class="slider-value" id="qfeed-val">1.00</span>
+                        </div>
+                        <input type="range" id="qfeed" min="0" max="2" step="0.02" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Draw-off q<sub>L</sub> (m³/s)</span>
+                            <span class="slider-value" id="qload-val">1.60</span>
+                        </div>
+                        <input type="range" id="qload" min="0" max="2.5" step="0.02" value="1.6">
+                    </div>
+                    <p class="hint">This is the load disturbance. Drag it <strong>slowly across q<sub>L</sub> = q<sub>f</sub> = 1.0</strong> to hand control from V₂ to V₁ through the split dead band.</p>
+                </div>
+
+                <!-- Setpoint Step -->
+                <div class="panel-section">
+                    <h3>Setpoint Step (live)</h3>
+                    <div class="step-buttons">
+                        <button class="step-btn" data-step="-1"><i class="fas fa-arrow-down"></i> 1 m</button>
+                        <button class="step-btn" data-step="-0.5"><i class="fas fa-arrow-down"></i> 0.5 m</button>
+                        <button class="step-btn" data-step="0.5"><i class="fas fa-arrow-up"></i> 0.5 m</button>
+                        <button class="step-btn" data-step="1"><i class="fas fa-arrow-up"></i> 1 m</button>
+                    </div>
+                    <p class="hint">Step the level setpoint while running and watch which valve takes the move.</p>
+                </div>
+
+                <!-- Presets -->
+                <div class="panel-section">
+                    <h3>Presets</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="pOnly">P only</button>
+                        <button class="preset-btn" data-preset="pi">PI (tuned)</button>
+                        <button class="preset-btn" data-preset="sluggish">Sluggish</button>
+                        <button class="preset-btn" data-preset="aggressive">Ringing</button>
+                    </div>
+                </div>
+
+                <!-- Formula -->
+                <div class="panel-section">
+                    <div class="formula-box">
+                        <span class="formula-label">Split-Range Characteristic</span>
+                        u ≤ 50 % : V₁ = (50 − u)/50 × 100 , V₂ = 0<br>
+                        u &gt; 50 % : V₂ = (u − 50)/50 × 100 , V₁ = 0
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Schematic + Charts -->
+            <div>
+                <!-- Surge Drum Schematic -->
+                <div class="tank-schematic-container">
+                    <div class="tank-schematic-header">
+                        <h3>Surge Drum Schematic</h3>
+                        <div class="live-indicator">
+                            <span class="live-dot"></span>
+                            LIVE
+                        </div>
+                    </div>
+                    <div class="tank-svg-wrapper">
+                        <svg id="split-svg" viewBox="0 0 720 430" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="srWaterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#0369a1;stop-opacity:0.9" />
+                                </linearGradient>
+                                <linearGradient id="srPipeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:var(--metal-1)" />
+                                    <stop offset="50%" style="stop-color:var(--metal-2)" />
+                                    <stop offset="100%" style="stop-color:var(--metal-1)" />
+                                </linearGradient>
+                                <filter id="srGlow">
+                                    <feGaussianBlur stdDeviation="2.5" result="b"/>
+                                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                </filter>
+                                <clipPath id="srTankClip">
+                                    <rect x="383" y="118" width="164" height="240" rx="6"/>
+                                </clipPath>
+                            </defs>
+
+                            <!-- ===== Surge drum ===== -->
+                            <rect x="380" y="115" width="170" height="245" rx="8" fill="none" stroke="#475569" stroke-width="3"/>
+                            <rect x="383" y="118" width="164" height="240" rx="6" fill="rgba(15,23,42,0.8)"/>
+                            <g clip-path="url(#srTankClip)">
+                                <rect id="water-level" x="383" y="358" width="164" height="0" fill="url(#srWaterGradient)"/>
+                            </g>
+
+                            <!-- Drum label (clear of the make-up riser at x = 457) -->
+                            <text x="376" y="108" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif" text-anchor="end" font-weight="500">Surge Drum</text>
+
+                            <!-- Level scale, in its own gutter left of the drum -->
+                            <text x="352" y="112" fill="#64748b" font-size="9" font-family="Inter, sans-serif" text-anchor="middle">m</text>
+                            <line x1="356" y1="358" x2="380" y2="358" stroke="#475569" stroke-width="1"/>
+                            <text x="351" y="361" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">0</text>
+                            <line x1="356" y1="278" x2="380" y2="278" stroke="#475569" stroke-width="1"/>
+                            <text x="351" y="281" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">5</text>
+                            <line x1="356" y1="198" x2="380" y2="198" stroke="#475569" stroke-width="1"/>
+                            <text x="351" y="201" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">10</text>
+                            <line x1="356" y1="118" x2="380" y2="118" stroke="#475569" stroke-width="1"/>
+                            <text x="351" y="121" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">15</text>
+
+                            <!-- Level setpoint, drawn INSIDE the drum so the label stays in frame -->
+                            <line id="setpoint-line" x1="383" y1="240.5" x2="547" y2="240.5" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6,4" filter="url(#srGlow)"/>
+                            <text id="setpoint-label" x="543" y="236" fill="#fbbf24" font-size="10" font-family="Inter, sans-serif" font-weight="600" text-anchor="end">SP 5.0 m</text>
+                            <text id="svg-level-label" x="543" y="351" fill="#e2e8f0" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="end" font-weight="600">h = 3.00 m</text>
+
+                            <!-- ===== Feed (left, low) ===== -->
+                            <rect x="300" y="168" width="83" height="16" rx="3" fill="url(#srPipeGradient)" stroke="#334155" stroke-width="1"/>
+                            <line x1="306" y1="176" x2="375" y2="176" stroke="#22c55e" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
+                            <g id="feed-arrow">
+                                <polygon points="374,169 386,176 374,183" fill="#22c55e"/>
+                            </g>
+                            <text x="338" y="158" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">Feed q<tspan font-size="8" dy="2">f</tspan></text>
+
+                            <!-- ===== Draw-off (bottom, right of the drain) ===== -->
+                            <rect x="550" y="352" width="100" height="16" rx="3" fill="url(#srPipeGradient)" stroke="#334155" stroke-width="1"/>
+                            <line x1="556" y1="360" x2="644" y2="360" stroke="#fbbf24" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
+                            <g id="draw-arrow">
+                                <polygon points="644,353 656,360 644,367" fill="#fbbf24"/>
+                            </g>
+                            <text x="600" y="344" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">Draw-off q<tspan font-size="8" dy="2">L</tspan></text>
+
+                            <!-- ===== Make-up riser (top) with V2 ===== -->
+                            <rect x="457" y="40" width="16" height="75" fill="url(#srPipeGradient)" stroke="#334155" stroke-width="1"/>
+                            <line x1="465" y1="46" x2="465" y2="112" stroke="#38bdf8" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
+                            <g id="makeup-arrow">
+                                <polygon points="458,72 465,84 472,72" fill="#38bdf8"/>
+                            </g>
+                            <rect x="453" y="62" width="24" height="28" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <rect id="v2-stroke" x="457" y="87" width="16" height="0" rx="2" fill="#38bdf8" opacity="0.75"/>
+                            <text x="465" y="32" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">Make-up</text>
+                            <text id="v2-open-label" x="485" y="80" fill="#38bdf8" font-size="10" font-family="JetBrains Mono, monospace" font-weight="600">0%</text>
+
+                            <!-- ===== Drain (bottom) with V1 ===== -->
+                            <rect x="457" y="358" width="16" height="37" fill="url(#srPipeGradient)" stroke="#334155" stroke-width="1"/>
+                            <line x1="465" y1="363" x2="465" y2="392" stroke="#f87171" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
+                            <g id="drain-arrow">
+                                <polygon points="458,376 465,388 472,376" fill="#f87171"/>
+                            </g>
+                            <rect x="453" y="366" width="24" height="28" rx="4" fill="#1e293b" stroke="#f87171" stroke-width="2"/>
+                            <rect id="v1-stroke" x="457" y="391" width="16" height="0" rx="2" fill="#f87171" opacity="0.75"/>
+                            <text x="465" y="410" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">Drain</text>
+                            <text id="v1-open-label" x="485" y="384" fill="#f87171" font-size="10" font-family="JetBrains Mono, monospace" font-weight="600">0%</text>
+
+                            <!-- ===== Level transmitter (left wall) ===== -->
+                            <circle cx="372" cy="270" r="8" fill="none" stroke="#10b981" stroke-width="2"/>
+                            <circle cx="372" cy="270" r="3" fill="#10b981"/>
+                            <text x="352" y="288" fill="#10b981" font-size="9" font-family="Inter, sans-serif" text-anchor="middle">LT</text>
+
+                            <!-- ===== PID controller ===== -->
+                            <rect x="40" y="140" width="190" height="80" rx="8" fill="#1e293b" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="135" y="172" fill="#0ea5e9" font-size="16" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">PID</text>
+                            <text x="135" y="190" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">split-range</text>
+                            <text x="135" y="206" fill="#64748b" font-size="8.5" font-family="Inter, sans-serif" text-anchor="middle">one output · two valves</text>
+
+                            <!-- Signal: LT -> PID, routed below the splitter panel -->
+                            <path d="M 364 270 L 344 270 L 344 412 L 70 412 L 70 220" stroke="#10b981" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+
+                            <!-- Signal: PID -> both valves -->
+                            <path d="M 230 180 H 275 M 275 76 V 380 M 275 76 H 445 M 275 380 H 445"
+                                  stroke="#0ea5e9" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+
+                            <!-- Branch annunciator -->
+                            <text id="svg-branch-label" x="135" y="240" fill="#f87171" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="700">SPLIT DEAD BAND</text>
+
+                            <!-- ===== Split-range characteristic monitor ===== -->
+                            <rect x="80" y="250" width="182" height="108" rx="6" fill="rgba(15,23,42,0.55)" stroke="#1e293b"/>
+                            <text x="200" y="261" fill="#fbbf24" font-size="8.5" font-family="Inter, sans-serif" text-anchor="middle">50 % split</text>
+                            <line x1="200" y1="265" x2="200" y2="352" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+                            <text x="145" y="273" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif" text-anchor="end">PID output u</text>
+                            <rect x="150" y="264" width="100" height="12" rx="2" fill="rgba(148,163,184,0.12)"/>
+                            <rect id="bar-u-fill" x="150" y="264" width="0" height="12" rx="2" fill="#a78bfa"/>
+                            <line id="bar-u-needle" x1="150" y1="261" x2="150" y2="279" stroke="#f8fafc" stroke-width="1.5"/>
+
+                            <text x="145" y="307" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif" text-anchor="end">V₁ drain</text>
+                            <rect x="150" y="298" width="100" height="12" rx="2" fill="rgba(148,163,184,0.12)"/>
+                            <rect id="bar-v1-fill" x="150" y="298" width="0" height="12" rx="2" fill="#f87171"/>
+
+                            <text x="145" y="341" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif" text-anchor="end">V₂ make-up</text>
+                            <rect x="150" y="332" width="100" height="12" rx="2" fill="rgba(148,163,184,0.12)"/>
+                            <rect id="bar-v2-fill" x="150" y="332" width="0" height="12" rx="2" fill="#38bdf8"/>
+
+                            <text x="171" y="368" fill="#64748b" font-size="8.5" font-family="Inter, sans-serif" text-anchor="middle">one output → two valves</text>
+                        </svg>
+                    </div>
+
+                    <!-- Live readouts live outside the drawing -->
+                    <div class="readout-row">
+                        <div class="readout-chip">
+                            <span class="rc-label">Level h</span>
+                            <span class="rc-value" id="ro-h">3.00 m</span>
+                        </div>
+                        <div class="readout-chip">
+                            <span class="rc-label">PID out</span>
+                            <span class="rc-value" id="ro-u">50.0 %</span>
+                        </div>
+                        <div class="readout-chip">
+                            <span class="rc-label">V₁ drain</span>
+                            <span class="rc-value" id="ro-v1">0.0 %</span>
+                        </div>
+                        <div class="readout-chip">
+                            <span class="rc-label">V₂ make-up</span>
+                            <span class="rc-value" id="ro-v2">0.0 %</span>
+                        </div>
+                        <div class="readout-chip">
+                            <span class="rc-label">q<sub>in</sub></span>
+                            <span class="rc-value" id="ro-qin">0.000 m³/s</span>
+                        </div>
+                        <div class="readout-chip">
+                            <span class="rc-label">q<sub>out</sub></span>
+                            <span class="rc-value" id="ro-qout">0.000 m³/s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts: MV directly below its PV -->
+                <div class="chart-container">
+                    <div class="chart-caption"><span class="tag-pv">PV</span> Drum level h and setpoint</div>
+                    <div id="chart-level" class="chart-plot stacked"></div>
+                    <div class="chart-caption"><span class="tag-mv">MV</span> Valve openings V₁ / V₂ and the controller output u</div>
+                    <div id="chart-valves" class="chart-plot stacked"></div>
+                    <div class="chart-caption"><span class="tag-mv">MV</span> Flows: make-up, drain, feed and draw-off</div>
+                    <div id="chart-flows" class="chart-plot stacked"></div>
+                </div>
+
+                <!-- Metrics -->
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-label">Level</div>
+                        <div class="metric-value" id="metric-level">3.00 m</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Controller Output</div>
+                        <div class="metric-value" id="metric-pid">50.0 %</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">V₁ Drain</div>
+                        <div class="metric-value" id="metric-v1">0.0 %</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">V₂ Make-up</div>
+                        <div class="metric-value" id="metric-v2">0.0 %</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Active Branch</div>
+                        <div class="metric-value" id="metric-branch">dead band</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Error (SP − h)</div>
+                        <div class="metric-value" id="metric-sse">+2.000 m</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parameter & equation reference -->
+        <section class="docs-section">
+            <h2 class="section-title">Parameters &amp; Equations</h2>
+            <p class="section-subtitle">Everything this simulation uses, written out for study.</p>
+            <div class="docs-grid">
+                <div class="docs-card">
+                    <h3>Process Model</h3>
+                    <div class="equation">
+                        <span class="eq-label">Surge drum mass balance</span>
+                        A · dh/dt = q<sub>f</sub> + q<sub>in</sub> − q<sub>out</sub> − q<sub>L</sub>
+                        <span class="eq-note">h — level (m) · A — cross-section (m²) · q<sub>f</sub> — constant feed · q<sub>L</sub> — draw-off load (the disturbance)</span>
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Valve flow laws</span>
+                        q<sub>out</sub> = K<sub>v1</sub> (V₁/100) √h &nbsp;&nbsp;·&nbsp;&nbsp; q<sub>in</sub> = K<sub>v2</sub> (V₂/100)
+                        <span class="eq-note">The drain is gravity-driven, so it follows √h (Torricelli). The make-up is pumped, so it is linear in the valve opening. <strong>The plant is an integrator</strong> — the controller sees A·dh/dt = net flow.</span>
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Overflow at the rim (open drum)</span>
+                        q<sub>ov</sub> = max(0, (q<sub>f</sub> + q<sub>in</sub> − q<sub>out</sub> − q<sub>L</sub>) while h = h<sub>max</sub> = 15 m)
+                        <span class="eq-note">The drum is open: when the inflow would push the level above the 15 m rim, h saturates and the excess leaves as overflow. The mass balance then closes in <em>every</em> state — a setpoint at the very brim behaves like a real overflowing vessel. For a clean steady state keep SP below 15 m (default 5 m).</span>
+                    </div>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Split-Range Characteristic <span class="badge-eq two-dof">complementary</span></h3>
+                    <div class="equation">
+                        <span class="eq-label">Two bands from one output</span>
+                        u ≤ 50 % : V₁ = (50 − u)/50 × 100 , V₂ = 0<br>
+                        u &gt; 50 % : V₂ = (u − 50)/50 × 100 , V₁ = 0
+                        <span class="eq-note">u = 50 % is the <strong>split point</strong>: both valves shut. This "complementary" split is the standard fail-safe arrangement for a level loop — a failed signal parks both valves closed instead of over-feeding or fully draining the drum.</span>
+                    </div>
+                    <div class="equation">
+                        <span class="eq-label">Branch gain matching</span>
+                        drain: dq/du = K<sub>v1</sub>√h<sub>sp</sub>/50 &nbsp;·&nbsp; make-up: dq/du = K<sub>v2</sub>/50
+                        <span class="eq-note">With K<sub>v1</sub> = 1.1, K<sub>v2</sub> = 2.5, h<sub>sp</sub> = 5 m: 0.0492 vs 0.0500 m³/s per %. Match them, otherwise the loop is well behaved in one branch and violent in the other.</span>
+                    </div>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Steady States</h3>
+                    <table class="param-table">
+                        <tr><th>q<sub>L</sub> (m³/s)</th><th>Branch</th><th>Needed flow</th><th>u (%)</th><th>Valve (%)</th></tr>
+                        <tr><td class="sym">0.2</td><td>drain</td><td class="def">0.80</td><td class="def">33.74</td><td class="def">V₁ 32.5</td></tr>
+                        <tr><td class="sym">0.4</td><td>drain</td><td class="def">0.60</td><td class="def">37.80</td><td class="def">V₁ 24.4</td></tr>
+                        <tr><td class="sym">0.8</td><td>drain</td><td class="def">0.20</td><td class="def">45.93</td><td class="def">V₁ 8.1</td></tr>
+                        <tr><td class="sym">1.0</td><td><strong>dead band</strong></td><td class="def">0.00</td><td class="def">50.00</td><td class="def">both 0</td></tr>
+                        <tr><td class="sym">1.2</td><td>make-up</td><td class="def">0.20</td><td class="def">54.00</td><td class="def">V₂ 8.0</td></tr>
+                        <tr><td class="sym">1.6</td><td>make-up</td><td class="def">0.60</td><td class="def">62.00</td><td class="def">V₂ 24.0</td></tr>
+                        <tr><td class="sym">2.0</td><td>make-up</td><td class="def">1.00</td><td class="def">70.00</td><td class="def">V₂ 40.0</td></tr>
+                    </table>
+                    <p>Every row above is reproduced by the running simulation to within 0.01 m. At exactly q<sub>L</sub> = q<sub>f</sub> the loop needs no flow at all, so it parks at u = 50 % with both valves shut — the <strong>split dead band</strong>, where the loop temporarily has zero gain. It is not an error: it is the price of the fail-safe split.</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Controller — 2-DOF PID <span class="badge-eq two-dof">2-DOF</span></h3>
+                    <div class="equation">
+                        <span class="eq-label">Control law</span>
+                        u = clamp[ 50 + K<sub>p</sub>(β·SP − h) + K<sub>i</sub>∫(SP − h)dt + K<sub>d</sub>(γ·dSP/dt − dh/dt), 0, 100 ]
+                        <span class="eq-note">Bias 50 % places the controller output at the split point when the level is on setpoint, leaving equal authority on both branches.</span>
+                    </div>
+                    <p><strong>Why the defaults look odd (K<sub>p</sub> = 0.5, K<sub>i</sub> = 15):</strong> the plant is an integrator, so the loop transfer function with PI control is K<sub>p</sub>K(τ<sub>i</sub>s+1)/(τ<sub>i</sub>As²). Comparing with the standard second-order form gives</p>
+                    <div class="equation">
+                        <span class="eq-label">Damping of the level loop</span>
+                        ζ = ½ √( K<sub>p</sub> K τ<sub>i</sub> / A ) , &nbsp; τ<sub>i</sub> = K<sub>p</sub>/K<sub>i</sub>
+                        <span class="eq-note">With A = 4, K ≈ 0.05 m³/s per %, the defaults K<sub>p</sub> = 0.5, K<sub>i</sub> = 15 give τ<sub>i</sub> = 0.033 s and ζ ≈ 0.007 — far underdamped. The loop overshoots hard, reaches the 15 m rim (overflow engages) and the floor, then rings. The <em>PI (tuned)</em> preset (K<sub>p</sub> = 12, K<sub>i</sub> = 1.2245) restores ζ ≈ 0.6 with the same A = 4.</span>
+                    </div>
+                    <p><strong>Derivative action is avoided here.</strong> A level signal is noisy, and K<sub>d</sub> amplifies that noise straight onto the valve stem. Set σ = 0.05 m and raise K<sub>d</sub> — the valve opening becomes a blur and the stem would wear out in the field. The default is K<sub>d</sub> = 0.</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Parameters</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
+                        <tr><td class="sym">A</td><td>Drum cross-section</td><td class="def">4.0 m²</td></tr>
+                        <tr><td class="sym">K<sub>v1</sub></td><td>Drain capacity coefficient</td><td class="def">1.10</td></tr>
+                        <tr><td class="sym">K<sub>v2</sub></td><td>Make-up capacity coefficient</td><td class="def">2.50</td></tr>
+                        <tr><td class="sym">q<sub>f</sub></td><td>Constant feed</td><td class="def">1.00 m³/s</td></tr>
+                        <tr><td class="sym">q<sub>L</sub></td><td>Draw-off load (disturbance)</td><td class="def">1.60 m³/s</td></tr>
+                        <tr><td class="sym">SP</td><td>Level setpoint (1–15 m)</td><td class="def">13.0 m</td></tr>
+                        <tr><td class="sym">u<sub>split</sub></td><td>Split point (fixed)</td><td class="def">50 %</td></tr>
+                        <tr><td class="sym">K<sub>p</sub></td><td>Proportional gain</td><td class="def">0.5</td></tr>
+                        <tr><td class="sym">K<sub>i</sub></td><td>Integral gain</td><td class="def">15.0</td></tr>
+                        <tr><td class="sym">K<sub>d</sub></td><td>Derivative gain</td><td class="def">0.00</td></tr>
+                    </table>
+                </div>
+
+                <div class="docs-card">
+                    <h3>What to Try</h3>
+                    <p><strong>1 — Walk the load across the split.</strong> Run (10x default — crank to 100x for a quicker walk), then drag <em>Draw-off q<sub>L</sub></em> slowly from 1.8 down to 0.4. The controller output slides from 62 % to 37.8 %: V₂ closes, both valves are briefly shut at u = 50 %, then V₁ takes over. The level barely moves.</p>
+                    <p><strong>2 — Unbalance the valves.</strong> Set K<sub>v1</sub> = 2.5 to make the drain as big as the make-up. Now 1 % of output buys far more drain flow than make-up flow: the drain branch overshoots and rings while the make-up branch stays calm.</p>
+                    <p><strong>3 — Sit in the dead band.</strong> Set q<sub>L</sub> = q<sub>f</sub> = 1.0 and step the setpoint. Both valves stay shut and nothing happens — the loop has no authority until the level drifts far enough to push the output off 50 %.</p>
+                    <p><strong>4 — Feel the new default ring.</strong> With K<sub>p</sub> = 0.5 and K<sub>i</sub> = 15 the loop is far underdamped (ζ ≈ 0.007): the level swings from the drum floor to the 15 m rim, the drum overflows at the top, and control hands back and forth between V₁ and V₂. Press <em>PI (tuned)</em> to see the same load handled calmly (ζ ≈ 0.6).</p>
+                    <p><strong>5 — Make it noisy.</strong> Set σ = 0.05 m and raise K<sub>d</sub> to 2. The valve strokes chatter continuously — the classic reason derivative action is left off level loops.</p>
+                    <p><strong>6 — Run the drum up to its new 15 m range.</strong> Drag the <em>Level Setpoint</em> slider up to 12–14 m and watch the level scale and the schematic fill re-range automatically. Push it all the way to 15 m (the rim): the drum saturates at the brim, the excess spills as overflow (the mass balance still closes exactly), and the level can no longer overshoot — the setpoint line, water, and V₁/V₂ all stay consistent on the new scale.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/pid-controller.js"></script>
+    <script src="js/split-range-control.js"></script>
+    <script>
+        // Mobile menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.getElementById('nav-links').classList.toggle('open');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>

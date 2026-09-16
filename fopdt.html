@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First-Order + Dead Time — PDC Lab</title>
+    <title>First-Order + Dead Time â€” PDC Lab</title>
     <link rel="stylesheet" href="styles.css">
     <script src="js/icons.js"></script>
     <script src="js/theme.js"></script>
@@ -29,7 +29,10 @@
             <a href="second-order.html">2nd Order</a>
             <a href="cstr-runaway.html">CSTR</a>
             <a href="cstr-control.html">CSTR Control</a>
+            <a href="cascade-control.html">Cascade</a>
+            <a href="split-range-control.html">Split Range</a>
         </div>
+        <!-- nav-fixed -->
         <button class="theme-toggle" id="theme-toggle" type="button"
                 role="switch" aria-checked="false"
                 aria-label="Switch to dark theme" title="Switch to dark theme">
@@ -40,7 +43,7 @@
 
     <div class="example-page">
         <div class="page-header">
-            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab Â· Amirkabir University of Technology (Tehran's Polytechnic)</div>
             <h1><i class="fas fa-wave-square" style="color:#f43f5e;"></i> First-Order Plus Dead Time</h1>
             <p>Explore how gain, time constant, and dead time shape step responses of FOPDT process models.</p>
         </div>
@@ -52,21 +55,21 @@
                     <h3>System Parameters</h3>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">K — Process Gain</span>
+                            <span class="slider-label">K â€” Process Gain</span>
                             <span class="slider-value" id="gain-val">2.0</span>
                         </div>
                         <input type="range" id="gain" min="0.1" max="10" step="0.1" value="2.0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">τ — Time Constant (s)</span>
+                            <span class="slider-label">Ï„ â€” Time Constant (s)</span>
                             <span class="slider-value" id="tau-val">3.0</span>
                         </div>
                         <input type="range" id="tau" min="0.5" max="20" step="0.1" value="3.0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">θ — Dead Time (s)</span>
+                            <span class="slider-label">Î¸ â€” Dead Time (s)</span>
                             <span class="slider-value" id="theta-val">1.0</span>
                         </div>
                         <input type="range" id="theta" min="0" max="10" step="0.1" value="1.0">
@@ -98,10 +101,10 @@
                 <div class="panel-section">
                     <div class="formula-box">
                         <span class="formula-label">Transfer Function</span>
-                        G(s) = K · e<sup>−θs</sup> / (τs + 1)
+                        G(s) = K Â· e<sup>âˆ’Î¸s</sup> / (Ï„s + 1)
                     </div>
                     <div class="info-box" style="margin-top:0.75rem;">
-                        <strong>FOPDT</strong> is the most widely used model in process control. It captures gain (K), speed of response (τ), and transport delay (θ).
+                        <strong>FOPDT</strong> is the most widely used model in process control. It captures gain (K), speed of response (Ï„), and transport delay (Î¸).
                     </div>
                 </div>
 
@@ -109,10 +112,10 @@
                     <h3>Response Metrics</h3>
                     <div class="formula-box" style="text-align:left;font-size:0.78rem;line-height:1.9;">
                         <span class="formula-label">Key Relationships</span>
-                        63.2% at t = θ + τ<br>
-                        95% at t ≈ θ + 3τ<br>
-                        98% at t ≈ θ + 4τ<br>
-                        Final value = K × Amplitude
+                        63.2% at t = Î¸ + Ï„<br>
+                        95% at t â‰ˆ Î¸ + 3Ï„<br>
+                        98% at t â‰ˆ Î¸ + 4Ï„<br>
+                        Final value = K Ã— Amplitude
                     </div>
                 </div>
             </div>
@@ -122,7 +125,7 @@
                 <div class="chart-container">
                     <div class="chart-tabs">
                         <button class="chart-tab active" data-chart="response">Step Response</button>
-                        <button class="chart-tab" data-chart="comparison">Multi-τ Comparison</button>
+                        <button class="chart-tab" data-chart="comparison">Multi-Ï„ Comparison</button>
                         <button class="chart-tab" data-chart="ramp">Ramp Response</button>
                     </div>
                     <div id="chart-response" class="chart-plot"></div>
@@ -163,13 +166,13 @@
                     <h3>Model</h3>
                     <div class="equation">
                         <span class="eq-label">Transfer function</span>
-                        G(s) = K · e<sup>−θs</sup> / (τs + 1)
-                        <span class="eq-note">K — process gain · τ — time constant (s) · θ — dead time (s).</span>
+                        G(s) = K Â· e<sup>âˆ’Î¸s</sup> / (Ï„s + 1)
+                        <span class="eq-note">K â€” process gain Â· Ï„ â€” time constant (s) Â· Î¸ â€” dead time (s).</span>
                     </div>
                     <div class="equation">
                         <span class="eq-label">Differential form</span>
-                        τ · dy/dt + y(t) = K · u(t − θ)
-                        <span class="eq-note">u is the input, delayed by θ before it affects y.</span>
+                        Ï„ Â· dy/dt + y(t) = K Â· u(t âˆ’ Î¸)
+                        <span class="eq-note">u is the input, delayed by Î¸ before it affects y.</span>
                     </div>
                 </div>
 
@@ -177,13 +180,13 @@
                     <h3>Exact Responses</h3>
                     <div class="equation">
                         <span class="eq-label">Step response (amplitude A)</span>
-                        y(t) = 0 &nbsp; (t &lt; θ)<br>
-                        y(t) = K·A·(1 − e<sup>−(t−θ)/τ</sup>) &nbsp; (t ≥ θ)
+                        y(t) = 0 &nbsp; (t &lt; Î¸)<br>
+                        y(t) = KÂ·AÂ·(1 âˆ’ e<sup>âˆ’(tâˆ’Î¸)/Ï„</sup>) &nbsp; (t â‰¥ Î¸)
                     </div>
                     <div class="equation">
                         <span class="eq-label">Ramp response (slope A)</span>
-                        y(t) = 0 &nbsp; (t &lt; θ)<br>
-                        y(t) = K·A·[(t−θ) − τ(1 − e<sup>−(t−θ)/τ</sup>)] &nbsp; (t ≥ θ)
+                        y(t) = 0 &nbsp; (t &lt; Î¸)<br>
+                        y(t) = KÂ·AÂ·[(tâˆ’Î¸) âˆ’ Ï„(1 âˆ’ e<sup>âˆ’(tâˆ’Î¸)/Ï„</sup>)] &nbsp; (t â‰¥ Î¸)
                     </div>
                 </div>
 
@@ -192,8 +195,8 @@
                     <table class="param-table">
                         <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
                         <tr><td class="sym">K</td><td>Process gain (steady output / input)</td><td class="def">2.0</td></tr>
-                        <tr><td class="sym">τ</td><td>Time constant (63.2% speed)</td><td class="def">3.0 s</td></tr>
-                        <tr><td class="sym">θ</td><td>Dead time (transport delay)</td><td class="def">1.0 s</td></tr>
+                        <tr><td class="sym">Ï„</td><td>Time constant (63.2% speed)</td><td class="def">3.0 s</td></tr>
+                        <tr><td class="sym">Î¸</td><td>Dead time (transport delay)</td><td class="def">1.0 s</td></tr>
                         <tr><td class="sym">A</td><td>Input step amplitude</td><td class="def">1.0</td></tr>
                     </table>
                 </div>
@@ -202,12 +205,12 @@
                     <h3>Key Relationships</h3>
                     <div class="equation">
                         <span class="eq-label">Response landmarks</span>
-                        Final value = K·A<br>
-                        63.2% at t = θ + τ<br>
-                        95% at t ≈ θ + 3τ<br>
-                        98% at t ≈ θ + 4τ<br>
-                        Initial slope = K·A/τ
-                        <span class="eq-note">θ shifts the curve in time; τ sets how fast it approaches the final value; K scales it.</span>
+                        Final value = KÂ·A<br>
+                        63.2% at t = Î¸ + Ï„<br>
+                        95% at t â‰ˆ Î¸ + 3Ï„<br>
+                        98% at t â‰ˆ Î¸ + 4Ï„<br>
+                        Initial slope = KÂ·A/Ï„
+                        <span class="eq-note">Î¸ shifts the curve in time; Ï„ sets how fast it approaches the final value; K scales it.</span>
                     </div>
                 </div>
             </div>
@@ -225,3 +228,4 @@
     </script>
 </body>
 </html>
+

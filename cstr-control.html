@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>CSTR Closed-Loop Control — PDC Lab</title>
+    <title>CSTR Closed-Loop Control â€” PDC Lab</title>
     <link rel="stylesheet" href="styles.css">
     <script src="js/icons.js"></script>
     <script src="js/theme.js"></script>
@@ -30,7 +30,10 @@
             <a href="second-order.html">2nd Order</a>
             <a href="cstr-runaway.html">CSTR</a>
             <a href="cstr-control.html" class="active">CSTR Control</a>
+            <a href="cascade-control.html">Cascade</a>
+            <a href="split-range-control.html">Split Range</a>
         </div>
+        <!-- nav-fixed -->
         <button class="theme-toggle" id="theme-toggle" type="button"
                 role="switch" aria-checked="false"
                 aria-label="Switch to dark theme" title="Switch to dark theme">
@@ -41,7 +44,7 @@
 
     <div class="example-page">
         <div class="page-header">
-            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab Â· Amirkabir University of Technology (Tehran's Polytechnic)</div>
             <h1><i class="fas fa-sliders-h" style="color:#10b981;"></i> CSTR Closed-Loop Control</h1>
             <p>Two decentralized PID controllers act on the exothermic CSTR simultaneously: the temperature loop manipulates coolant temperature T<sub>c</sub>, the concentration loop manipulates feed flow q.</p>
             <div class="mode-tabs">
@@ -74,7 +77,7 @@
                     </div>
                     <div class="slider-group" style="margin-top:0.75rem;">
                         <div class="slider-header">
-                            <span class="slider-label">t_end — Simulation Time (s)</span>
+                            <span class="slider-label">t_end â€” Simulation Time (s)</span>
                             <input type="number" id="tend" class="num-input" min="1" max="600" step="1" value="60" inputmode="decimal">
                         </div>
                         <p class="hint">Type the simulation time and press <strong>Enter</strong> to apply.</p>
@@ -83,7 +86,7 @@
 
                 <!-- Temperature PID -->
                 <div class="panel-section pid-temp-section">
-                    <h3><i class="fas fa-thermometer-half"></i> Temperature PID → Coolant T<sub>c</sub></h3>
+                    <h3><i class="fas fa-thermometer-half"></i> Temperature PID â†’ Coolant T<sub>c</sub></h3>
                     <div class="slider-group">
                         <div class="slider-header">
                             <span class="slider-label">Kp</span>
@@ -121,28 +124,28 @@
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">β — P Setpoint Weight</span>
+                            <span class="slider-label">Î² â€” P Setpoint Weight</span>
                             <span class="slider-value" id="t-beta-val">1.00</span>
                         </div>
                         <input type="range" id="t-beta" min="0" max="1" step="0.05" value="1">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">γ — D Setpoint Weight</span>
+                            <span class="slider-label">Î³ â€” D Setpoint Weight</span>
                             <span class="slider-value" id="t-gamma-val">0.00</span>
                         </div>
                         <input type="range" id="t-gamma" min="0" max="1" step="0.05" value="0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">PV Noise σ (K)</span>
+                            <span class="slider-label">PV Noise Ïƒ (K)</span>
                             <span class="slider-value" id="noise-t-val">0.000</span>
                         </div>
                         <input type="range" id="noise-t" min="0" max="5" step="0.001" value="0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">α — D Filter (0 = off)</span>
+                            <span class="slider-label">Î± â€” D Filter (0 = off)</span>
                             <span class="slider-value" id="t-alpha-val">0.00</span>
                         </div>
                         <input type="range" id="t-alpha" min="0" max="0.95" step="0.05" value="0">
@@ -155,7 +158,7 @@
 
                 <!-- Concentration PID -->
                 <div class="panel-section pid-conc-section">
-                    <h3><i class="fas fa-flask"></i> Concentration PID → Feed q</h3>
+                    <h3><i class="fas fa-flask"></i> Concentration PID â†’ Feed q</h3>
                     <div class="slider-group">
                         <div class="slider-header">
                             <span class="slider-label">Kp</span>
@@ -193,28 +196,28 @@
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">β — P Setpoint Weight</span>
+                            <span class="slider-label">Î² â€” P Setpoint Weight</span>
                             <span class="slider-value" id="c-beta-val">1.00</span>
                         </div>
                         <input type="range" id="c-beta" min="0" max="1" step="0.05" value="1">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">γ — D Setpoint Weight</span>
+                            <span class="slider-label">Î³ â€” D Setpoint Weight</span>
                             <span class="slider-value" id="c-gamma-val">0.00</span>
                         </div>
                         <input type="range" id="c-gamma" min="0" max="1" step="0.05" value="0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">PV Noise σ (mol/L)</span>
+                            <span class="slider-label">PV Noise Ïƒ (mol/L)</span>
                             <span class="slider-value" id="noise-c-val">0.000</span>
                         </div>
                         <input type="range" id="noise-c" min="0" max="0.05" step="0.001" value="0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">α — D Filter (0 = off)</span>
+                            <span class="slider-label">Î± â€” D Filter (0 = off)</span>
                             <span class="slider-value" id="c-alpha-val">0.00</span>
                         </div>
                         <input type="range" id="c-alpha" min="0" max="0.95" step="0.05" value="0">
@@ -250,49 +253,49 @@
                     <h3>Reactor Parameters</h3>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">V — Volume (m³)</span>
+                            <span class="slider-label">V â€” Volume (mÂ³)</span>
                             <span class="slider-value" id="vol-val">100</span>
                         </div>
                         <input type="range" id="vol" min="10" max="300" step="1" value="100">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">UA — Heat Transfer (W/K)</span>
+                            <span class="slider-label">UA â€” Heat Transfer (W/K)</span>
                             <span class="slider-value" id="ua-val">50.0k</span>
                         </div>
                         <input type="range" id="ua" min="0" max="200000" step="1000" value="50000">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">k₀ — Pre-exponential (1/s)</span>
+                            <span class="slider-label">kâ‚€ â€” Pre-exponential (1/s)</span>
                             <span class="slider-value" id="k0-val">7.2e10</span>
                         </div>
                         <input type="range" id="k0" min="8" max="14" step="0.05" value="10.857">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">E/R — Activation (K)</span>
+                            <span class="slider-label">E/R â€” Activation (K)</span>
                             <span class="slider-value" id="eoverr-val">8750</span>
                         </div>
                         <input type="range" id="eoverr" min="4000" max="15000" step="50" value="8750">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">ΔH<sub>r</sub></span>
+                            <span class="slider-label">Î”H<sub>r</sub></span>
                             <span class="slider-value" id="dhr-val">-5.0e4</span>
                         </div>
                         <input type="range" id="dhr" min="-200000" max="-10000" step="1000" value="-50000">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">ρ — Density (kg/m³)</span>
+                            <span class="slider-label">Ï â€” Density (kg/mÂ³)</span>
                             <span class="slider-value" id="rho-val">1000</span>
                         </div>
                         <input type="range" id="rho" min="500" max="2000" step="10" value="1000">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">C<sub>p</sub> — Heat Capacity</span>
+                            <span class="slider-label">C<sub>p</sub> â€” Heat Capacity</span>
                             <span class="slider-value" id="cp-val">0.239</span>
                         </div>
                         <input type="range" id="cp" min="0.1" max="1" step="0.001" value="0.239">
@@ -323,11 +326,11 @@
                 <div class="panel-section">
                     <div class="formula-box">
                         <span class="formula-label">Two-Loop Control</span>
-                        T-loop: T<sub>c</sub> = PID<sub>T</sub>(T<sub>sp</sub> − T)<br>
-                        C<sub>A</sub>-loop: q = PID<sub>CA</sub>(C<sub>A,sp</sub> − C<sub>A</sub>)
+                        T-loop: T<sub>c</sub> = PID<sub>T</sub>(T<sub>sp</sub> âˆ’ T)<br>
+                        C<sub>A</sub>-loop: q = PID<sub>CA</sub>(C<sub>A,sp</sub> âˆ’ C<sub>A</sub>)
                     </div>
                     <div class="info-box" style="margin-top:0.75rem;">
-                        <strong>Decentralized PID.</strong> The loops interact — coolant temperature and feed flow both affect T and C<sub>A</sub>. Try changing one setpoint and watch the other loop compensate.
+                        <strong>Decentralized PID.</strong> The loops interact â€” coolant temperature and feed flow both affect T and C<sub>A</sub>. Try changing one setpoint and watch the other loop compensate.
                     </div>
                 </div>
             </div>
@@ -469,15 +472,15 @@
                         <button class="chart-tab" data-chart="conc"><i class="fas fa-flask"></i> Concentration Loop</button>
                     </div>
                     <div id="tab-temp">
-                        <div class="chart-caption"><span class="tag-pv">PV</span> Reactor Temperature T — controlled variable</div>
+                        <div class="chart-caption"><span class="tag-pv">PV</span> Reactor Temperature T â€” controlled variable</div>
                         <div id="chart-temp" class="chart-plot stacked"></div>
-                        <div class="chart-caption"><span class="tag-mv">MV</span> Coolant Temperature T<sub>c</sub> — manipulated by the T-loop</div>
+                        <div class="chart-caption"><span class="tag-mv">MV</span> Coolant Temperature T<sub>c</sub> â€” manipulated by the T-loop</div>
                         <div id="chart-tc" class="chart-plot stacked"></div>
                     </div>
                     <div id="tab-conc" style="display:none;">
-                        <div class="chart-caption"><span class="tag-pv">PV</span> Concentration C<sub>A</sub> — controlled variable</div>
+                        <div class="chart-caption"><span class="tag-pv">PV</span> Concentration C<sub>A</sub> â€” controlled variable</div>
                         <div id="chart-conc" class="chart-plot stacked"></div>
-                        <div class="chart-caption"><span class="tag-mv">MV</span> Feed Flow q — manipulated by the C<sub>A</sub>-loop</div>
+                        <div class="chart-caption"><span class="tag-mv">MV</span> Feed Flow q â€” manipulated by the C<sub>A</sub>-loop</div>
                         <div id="chart-q" class="chart-plot stacked"></div>
                     </div>
                 </div>
@@ -520,39 +523,39 @@
                     <h3>Reactor Model</h3>
                     <div class="equation">
                         <span class="eq-label">Mole balance</span>
-                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> − C<sub>A</sub>) − k·C<sub>A</sub>
+                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> âˆ’ C<sub>A</sub>) âˆ’ kÂ·C<sub>A</sub>
                     </div>
                     <div class="equation">
                         <span class="eq-label">Energy balance</span>
-                        dT/dt = (q/V)(T<sub>i</sub> − T) − ΔH<sub>r</sub>·k·C<sub>A</sub>/(ρC<sub>p</sub>) + UA(T<sub>c</sub> − T)/(ρC<sub>p</sub>V)
+                        dT/dt = (q/V)(T<sub>i</sub> âˆ’ T) âˆ’ Î”H<sub>r</sub>Â·kÂ·C<sub>A</sub>/(ÏC<sub>p</sub>) + UA(T<sub>c</sub> âˆ’ T)/(ÏC<sub>p</sub>V)
                     </div>
                     <div class="equation">
                         <span class="eq-label">Arrhenius rate</span>
-                        k = k<sub>0</sub>·exp(−(E/R)/T)
+                        k = k<sub>0</sub>Â·exp(âˆ’(E/R)/T)
                         <span class="eq-note">The exponential makes the system stiff: small T changes cause large rate changes.</span>
                     </div>
                 </div>
 
                 <div class="docs-card">
-                    <h3>Two Control Loops — 2-DOF PID <span class="badge-eq two-dof">2-DOF</span></h3>
+                    <h3>Two Control Loops â€” 2-DOF PID <span class="badge-eq two-dof">2-DOF</span></h3>
                     <div class="equation">
-                        <span class="eq-label">Temperature loop → coolant temperature</span>
-                        T<sub>c</sub> = clamp[ T<sub>c0</sub> + K<sub>p,T</sub>(β<sub>T</sub>·T<sub>sp</sub> − T) + K<sub>i,T</sub>∫(T<sub>sp</sub>−T)dt + K<sub>d,T</sub>(γ<sub>T</sub>·dT<sub>sp</sub>/dt − dT/dt), 250, 400 ]
+                        <span class="eq-label">Temperature loop â†’ coolant temperature</span>
+                        T<sub>c</sub> = clamp[ T<sub>c0</sub> + K<sub>p,T</sub>(Î²<sub>T</sub>Â·T<sub>sp</sub> âˆ’ T) + K<sub>i,T</sub>âˆ«(T<sub>sp</sub>âˆ’T)dt + K<sub>d,T</sub>(Î³<sub>T</sub>Â·dT<sub>sp</sub>/dt âˆ’ dT/dt), 250, 400 ]
                     </div>
                     <div class="equation">
-                        <span class="eq-label">Concentration loop → feed flow</span>
-                        q = clamp[ q<sub>0</sub> + K<sub>p,CA</sub>(β<sub>CA</sub>·C<sub>A,sp</sub> − C<sub>A</sub>) + K<sub>i,CA</sub>∫(C<sub>A,sp</sub>−C<sub>A</sub>)dt + K<sub>d,CA</sub>(γ<sub>CA</sub>·dC<sub>A,sp</sub>/dt − dC<sub>A</sub>/dt), 10, 300 ]
+                        <span class="eq-label">Concentration loop â†’ feed flow</span>
+                        q = clamp[ q<sub>0</sub> + K<sub>p,CA</sub>(Î²<sub>CA</sub>Â·C<sub>A,sp</sub> âˆ’ C<sub>A</sub>) + K<sub>i,CA</sub>âˆ«(C<sub>A,sp</sub>âˆ’C<sub>A</sub>)dt + K<sub>d,CA</sub>(Î³<sub>CA</sub>Â·dC<sub>A,sp</sub>/dt âˆ’ dC<sub>A</sub>/dt), 10, 300 ]
                         <span class="eq-note">The two loops interact: both T<sub>c</sub> and q affect T and C<sub>A</sub>.</span>
                     </div>
                     <div class="equation">
                         <span class="eq-label">Term contributions (each loop)</span>
                         u = u<sub>bias</sub> + P + I + D<sub>f</sub><br>
-                        P = K<sub>p</sub>(β·SP − PV)<br>
-                        I = K<sub>i</sub>∫(SP − PV)dt<br>
-                        D<sub>f</sub>[k] = a·D<sub>f</sub>[k−1] + (1−a)·K<sub>d</sub>(γ·dSP/dt − dPV/dt), &nbsp; a = exp(−Δt/τ)
+                        P = K<sub>p</sub>(Î²Â·SP âˆ’ PV)<br>
+                        I = K<sub>i</sub>âˆ«(SP âˆ’ PV)dt<br>
+                        D<sub>f</sub>[k] = aÂ·D<sub>f</sub>[kâˆ’1] + (1âˆ’a)Â·K<sub>d</sub>(Î³Â·dSP/dt âˆ’ dPV/dt), &nbsp; a = exp(âˆ’Î”t/Ï„)
                         <span class="eq-note">Only the sum u is limited by the actuator. When it saturates, anti-reset windup removes the over-drive from I so the integral cannot wind up.</span>
                     </div>
-                    <p><strong>β (beta)</strong> — proportional setpoint weight · <strong>γ (gamma)</strong> — derivative setpoint weight. β = 1, γ = 0 is a standard PID with derivative-on-measurement.</p>
+                    <p><strong>Î² (beta)</strong> â€” proportional setpoint weight Â· <strong>Î³ (gamma)</strong> â€” derivative setpoint weight. Î² = 1, Î³ = 0 is a standard PID with derivative-on-measurement.</p>
                 </div>
 
                 <div class="docs-card">
@@ -560,13 +563,13 @@
                     <table class="param-table">
                         <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
                         <tr><td class="sym">C<sub>Ain</sub></td><td>Feed concentration</td><td class="def">1.00 mol/L</td></tr>
-                        <tr><td class="sym">V</td><td>Reactor volume</td><td class="def">100 m³</td></tr>
+                        <tr><td class="sym">V</td><td>Reactor volume</td><td class="def">100 mÂ³</td></tr>
                         <tr><td class="sym">T<sub>i</sub></td><td>Feed temperature</td><td class="def">350 K</td></tr>
-                        <tr><td class="sym">UA</td><td>Heat-transfer coefficient</td><td class="def">5.0×10⁴ W/K</td></tr>
-                        <tr><td class="sym">k<sub>0</sub></td><td>Pre-exponential factor</td><td class="def">7.2×10¹⁰ 1/s</td></tr>
+                        <tr><td class="sym">UA</td><td>Heat-transfer coefficient</td><td class="def">5.0Ã—10â´ W/K</td></tr>
+                        <tr><td class="sym">k<sub>0</sub></td><td>Pre-exponential factor</td><td class="def">7.2Ã—10Â¹â° 1/s</td></tr>
                         <tr><td class="sym">E/R</td><td>Activation temperature</td><td class="def">8750 K</td></tr>
-                        <tr><td class="sym">ΔH<sub>r</sub></td><td>Heat of reaction</td><td class="def">−5.0×10⁴</td></tr>
-                        <tr><td class="sym">ρ</td><td>Density</td><td class="def">1000 kg/m³</td></tr>
+                        <tr><td class="sym">Î”H<sub>r</sub></td><td>Heat of reaction</td><td class="def">âˆ’5.0Ã—10â´</td></tr>
+                        <tr><td class="sym">Ï</td><td>Density</td><td class="def">1000 kg/mÂ³</td></tr>
                         <tr><td class="sym">C<sub>p</sub></td><td>Heat capacity</td><td class="def">0.239</td></tr>
                         <tr><td class="sym">T<sub>c0</sub>, q<sub>0</sub></td><td>Controller bias (operating point)</td><td class="def">300 K, 100</td></tr>
                     </table>
@@ -580,15 +583,15 @@
                         <tr><td class="sym">K<sub>i</sub></td><td>Integral gain</td><td class="def">1 / 8</td></tr>
                         <tr><td class="sym">K<sub>d</sub></td><td>Derivative gain</td><td class="def">0.3 / 1.5</td></tr>
                         <tr><td class="sym">T<sub>sp</sub>, C<sub>A,sp</sub></td><td>Setpoints</td><td class="def">350 K / 0.5 mol/L</td></tr>
-                        <tr><td class="sym">β <span class="badge-eq two-dof">2-DOF</span></td><td>Proportional setpoint weight</td><td class="def">1.00 / 1.00</td></tr>
-                        <tr><td class="sym">γ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00 / 0.00</td></tr>
-                        <tr><td class="sym">α <span class="badge-eq filter">filter</span></td><td>Derivative filter (0 = off)</td><td class="def">0.00 / 0.00</td></tr>
-                        <tr><td class="sym">σ <span class="badge-eq noise">noise</span></td><td>PV sensor noise std-dev</td><td class="def">0 K / 0 mol/L</td></tr>
+                        <tr><td class="sym">Î² <span class="badge-eq two-dof">2-DOF</span></td><td>Proportional setpoint weight</td><td class="def">1.00 / 1.00</td></tr>
+                        <tr><td class="sym">Î³ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00 / 0.00</td></tr>
+                        <tr><td class="sym">Î± <span class="badge-eq filter">filter</span></td><td>Derivative filter (0 = off)</td><td class="def">0.00 / 0.00</td></tr>
+                        <tr><td class="sym">Ïƒ <span class="badge-eq noise">noise</span></td><td>PV sensor noise std-dev</td><td class="def">0 K / 0 mol/L</td></tr>
                         <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup (back-calculation)</td><td class="def">on / on</td></tr>
                     </table>
-                    <p><strong>PV noise:</strong> each measurement is corrupted by zero-mean Gaussian noise: T<sub>meas</sub> = T + σ<sub>T</sub>·N(0,1) and C<sub>A,meas</sub> = C<sub>A</sub> + σ<sub>CA</sub>·N(0,1). The reactor state itself remains noise-free.</p>
-                    <p><strong>Anti-reset windup:</strong> when the actuator saturates, back-calculation bleeds the integral by the over-drive I ← I + (Δt/T<sub>t</sub>)(u<sub>sat</sub> − u), so I settles at the value that holds the actuator on its limit instead of accumulating error. It is robust to noisy PVs (unlike an error-sign freeze test), and the integral is always kept within its own limits. Disable it to observe windup.</p>
-                    <p><strong>Derivative filter (α):</strong> D<sub>f</sub>[k] = a·D<sub>f</sub>[k−1] + (1−a)·D<sub>raw</sub>[k] with a = exp(−Δt/τ) and τ set from α. α = 0 disables filtering; larger α smooths the derivative (useful with noisy sensors). Because the filter is defined by a physical time constant τ (not a fixed per-sample weight), the same α gives the same smoothing at every integration step.</p>
+                    <p><strong>PV noise:</strong> each measurement is corrupted by zero-mean Gaussian noise: T<sub>meas</sub> = T + Ïƒ<sub>T</sub>Â·N(0,1) and C<sub>A,meas</sub> = C<sub>A</sub> + Ïƒ<sub>CA</sub>Â·N(0,1). The reactor state itself remains noise-free.</p>
+                    <p><strong>Anti-reset windup:</strong> when the actuator saturates, back-calculation bleeds the integral by the over-drive I â† I + (Î”t/T<sub>t</sub>)(u<sub>sat</sub> âˆ’ u), so I settles at the value that holds the actuator on its limit instead of accumulating error. It is robust to noisy PVs (unlike an error-sign freeze test), and the integral is always kept within its own limits. Disable it to observe windup.</p>
+                    <p><strong>Derivative filter (Î±):</strong> D<sub>f</sub>[k] = aÂ·D<sub>f</sub>[kâˆ’1] + (1âˆ’a)Â·D<sub>raw</sub>[k] with a = exp(âˆ’Î”t/Ï„) and Ï„ set from Î±. Î± = 0 disables filtering; larger Î± smooths the derivative (useful with noisy sensors). Because the filter is defined by a physical time constant Ï„ (not a fixed per-sample weight), the same Î± gives the same smoothing at every integration step.</p>
                 </div>
             </div>
         </section>
@@ -606,3 +609,4 @@
     </script>
 </body>
 </html>
+

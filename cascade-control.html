@@ -1,0 +1,409 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cascade Control — PDC Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/icons.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <i class="fas fa-wave-square"></i>
+            <span>PDC Lab</span>
+        </a>
+        <div class="nav-institution">
+            <span class="ni-lab">PSE Lab</span>
+            <span class="ni-school">Amirkabir University of Technology (Tehran's Polytechnic)</span>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="pid-tank.html">PID Tank</a>
+            <a href="fopdt.html">FOPDT</a>
+            <a href="second-order.html">2nd Order</a>
+            <a href="cstr-runaway.html">CSTR</a>
+            <a href="cstr-control.html">CSTR Control</a>
+            <a href="cascade-control.html" class="active">Cascade</a>
+            <a href="split-range-control.html">Split Range</a>
+        </div>
+        <!-- nav-fixed -->
+        <button class="theme-toggle" id="theme-toggle" type="button"
+                role="switch" aria-checked="false"
+                aria-label="Switch to dark theme" title="Switch to dark theme">
+            <i class="fas fa-moon icon-moon" aria-hidden="true"></i>
+            <i class="fas fa-sun icon-sun" aria-hidden="true"></i>
+        </button>
+    </nav>
+
+    <div class="example-page">
+        <div class="page-header">
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <h1><i class="fas fa-layer-group" style="color:#a78bfa;"></i> Cascade Control</h1>
+            <p>A two-loop cascade on a jacketed stirred-tank heater: the outer (master) TIC controls the product temperature T<sub>2</sub> and hands the inner (slave) TjC a jacket-temperature setpoint, which in turn moves the steam valve. Switch to <strong>Single Loop</strong> to run the same plant with the TIC driving the valve directly, and compare the two under one disturbance.</p>
+        </div>
+
+        <div class="page-layout">
+            <!-- ================= Control panel ================= -->
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h3>Simulation Control</h3>
+                    <div class="sim-controls">
+                        <button class="run-pause-btn" id="run-pause-btn">
+                            <i class="fas fa-play" id="run-pause-icon"></i>
+                            <span id="run-pause-text">Run</span>
+                        </button>
+                        <button class="reset-btn" id="reset-btn" title="Reset simulation">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </div>
+                    <div class="speed-controls">
+                        <label>Simulation Speed</label>
+                        <button class="speed-btn" data-speed="1">1x</button>
+                        <button class="speed-btn active" data-speed="5">5x</button>
+                        <button class="speed-btn" data-speed="20">20x</button>
+                        <button class="speed-btn" data-speed="100">100x</button>
+                    </div>
+                    <div class="slider-group" style="margin-top:0.75rem;">
+                        <div class="slider-header">
+                            <span class="slider-label">t_end — Simulation Time (s)</span>
+                            <input type="number" id="tend" class="num-input" min="10" max="5000" step="10" value="60" inputmode="decimal">
+                        </div>
+                        <p class="hint">Type the simulation time and press <strong>Enter</strong> to apply.</p>
+                    </div>
+                    <div class="step-buttons">
+                        <button class="step-btn" data-step="-5"><i class="fas fa-arrow-down"></i> 5 °C</button>
+                        <button class="step-btn" data-step="-10"><i class="fas fa-arrow-down"></i> 10 °C</button>
+                        <button class="step-btn" data-step="5"><i class="fas fa-arrow-up"></i> 5 °C</button>
+                        <button class="step-btn" data-step="10"><i class="fas fa-arrow-up"></i> 10 °C</button>
+                    </div>
+                    <p class="hint">Step the product setpoint while running to watch which loop does the work.</p>
+                </div>
+
+                <!-- Structure selector -->
+                <div class="panel-section">
+                    <h3>Structure</h3>
+                    <div class="mode-selector">
+                        <button class="mode-btn active" data-mode="cascade">Cascade</button>
+                        <button class="mode-btn" data-mode="single">Single Loop</button>
+                    </div>
+                    <p class="hint">Both structures run every step, and the switch is bumpless in both directions.</p>
+                </div>
+
+                <!-- Outer loop -->
+                <div class="panel-section pid-temp-section" id="outer-panel">
+                    <h3><i class="fas fa-crosshairs"></i> Outer PID &rarr; T<sub>j,sp</sub></h3>
+                    <p class="hint" id="outer-sub">product temperature → jacket setpoint</p>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">K<sub>p</sub></span><span class="slider-value" id="out-kp-val">1.80</span></div><input type="range" id="out-kp" min="0" max="10" step="0.05" value="1.8"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">K<sub>i</sub></span><span class="slider-value" id="out-ki-val">0.200</span></div><input type="range" id="out-ki" min="0" max="3" step="0.005" value="0.2"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">K<sub>d</sub></span><span class="slider-value" id="out-kd-val">0.50</span></div><input type="range" id="out-kd" min="0" max="8" step="0.05" value="0.5"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">T<sub>2</sub> Setpoint (°C)</span><span class="slider-value" id="sp-val">80.0</span></div><input type="range" id="setpoint" min="35" max="130" step="0.5" value="80"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">β — proportional weight <span class="badge-eq two-dof">2-DOF</span></span><span class="slider-value" id="o-beta-val">1.00</span></div><input type="range" id="o-beta" min="0" max="1" step="0.05" value="1"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">γ — derivative weight <span class="badge-eq two-dof">2-DOF</span></span><span class="slider-value" id="o-gamma-val">0.00</span></div><input type="range" id="o-gamma" min="0" max="1" step="0.05" value="0"></div>
+                </div>
+
+                <!-- Inner loop -->
+                <div class="panel-section pid-conc-section" id="inner-panel">
+                    <h3><i class="fas fa-fire-alt"></i> Inner PID &rarr; Steam Valve</h3>
+                    <p class="hint">jacket temperature → steam valve (%)</p>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">K<sub>p</sub></span><span class="slider-value" id="inn-kp-val">2.50</span></div><input type="range" id="inn-kp" min="0" max="12" step="0.05" value="2.5"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">K<sub>i</sub></span><span class="slider-value" id="inn-ki-val">0.800</span></div><input type="range" id="inn-ki" min="0" max="5" step="0.01" value="0.8"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">K<sub>d</sub></span><span class="slider-value" id="inn-kd-val">0.20</span></div><input type="range" id="inn-kd" min="0" max="5" step="0.05" value="0.2"></div>
+                </div>
+
+                <!-- Plant -->
+                <div class="panel-section">
+                    <h3>Jacketed Vessel &amp; Steam</h3>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">τ<sub>2</sub> — vessel time constant (s)</span><span class="slider-value" id="tau2-val">8.0</span></div><input type="range" id="tau2" min="1" max="30" step="0.5" value="8"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">τ<sub>j</sub> — jacket time constant (s)</span><span class="slider-value" id="tauj-val">3.0</span></div><input type="range" id="tauj" min="0.5" max="20" step="0.5" value="3"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">K<sub>s</sub> — steam authority</span><span class="slider-value" id="ks-val">2.00</span></div><input type="range" id="ks" min="0.2" max="6" step="0.05" value="2"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">θ — transport delay (s)</span><span class="slider-value" id="theta-val">1.0</span></div><input type="range" id="theta" min="0" max="8" step="0.1" value="1"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">T<sub>steam</sub> (°C) — disturbance</span><span class="slider-value" id="tsteam-val">140</span></div><input type="range" id="tsteam" min="90" max="180" step="1" value="140"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">T<sub>in</sub> (°C) — feed disturbance</span><span class="slider-value" id="tin-val">25</span></div><input type="range" id="tin" min="5" max="70" step="1" value="25"></div>
+                </div>
+
+                <!-- Controller options -->
+                <div class="panel-section">
+                    <h3>Controller Options</h3>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">τ<sub>D</sub> — derivative filter (s)</span><span class="slider-value" id="tau-d-val">1.00</span></div><input type="range" id="tau-d" min="0" max="8" step="0.1" value="1"></div>
+                    <div class="slider-group"><div class="slider-header"><span class="slider-label">σ — PV sensor noise (°C)</span><span class="slider-value" id="noise-val">0.00</span></div><input type="range" id="noise" min="0" max="3" step="0.05" value="0"></div>
+                    <label class="checkbox-label"><input type="checkbox" id="antiwindup" checked> Anti-reset windup (back-calculation)</label>
+                    <p class="hint">Set σ = 1 °C and raise the outer K<sub>d</sub> to see why the filter exists.</p>
+                </div>
+
+                <!-- Presets -->
+                <div class="panel-section">
+                    <h3>Presets</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn active" data-preset="cascadeTuned">Cascade (tuned)</button>
+                        <button class="preset-btn" data-preset="cascadeSlow">Cascade (slow)</button>
+                        <button class="preset-btn" data-preset="cascadeFast">Cascade (fast)</button>
+                        <button class="preset-btn" data-preset="singleTuned">Single loop</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ================= Schematic + charts ================= -->
+            <div>
+                <div class="tank-schematic-container">
+                    <div class="tank-schematic-header">
+                        <h3>Cascade Control Schematic</h3>
+                        <div class="live-indicator"><span class="live-dot"></span><span>LIVE</span></div>
+                    </div>
+                    <div class="tank-svg-wrapper">
+                        <svg id="cascade-svg" viewBox="0 0 720 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cascade control schematic of a jacketed stirred tank heater">
+                            <defs>
+                                <linearGradient id="cascJacketGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:var(--jacket-1)"/>
+                                    <stop offset="100%" style="stop-color:var(--jacket-2)"/>
+                                </linearGradient>
+                                <linearGradient id="cascMetalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:var(--metal-1)"/>
+                                    <stop offset="50%" style="stop-color:var(--metal-2)"/>
+                                    <stop offset="100%" style="stop-color:var(--metal-1)"/>
+                                </linearGradient>
+                                <linearGradient id="cascProductGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#f97316"/>
+                                    <stop offset="100%" stop-color="#0369a1"/>
+                                </linearGradient>
+                                <clipPath id="cascProductClip"><rect x="292" y="204" width="120" height="140" rx="5"/></clipPath>
+                                <clipPath id="cascJacketClip"><rect x="272" y="186" width="160" height="186" rx="10"/></clipPath>
+                                <marker id="cascArrRed" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#ef4444"/></marker>
+                                <marker id="cascArrViolet" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#a78bfa"/></marker>
+                                <marker id="cascArrGreen" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#10b981"/></marker>
+                                <marker id="cascArrCyan" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#0ea5e9"/></marker>
+                            </defs>
+
+                            <!-- ---------- Steam supply, valve and jacket ---------- -->
+                            <rect x="344" y="18" width="16" height="34" fill="url(#cascMetalGrad)" stroke="#334155" stroke-width="1"/>
+                            <line id="casc-steam-flow" x1="352" y1="20" x2="352" y2="52" stroke="#10b981" stroke-width="3" stroke-dasharray="7 4" class="flow-line" opacity="0.8"/>
+                            <text x="352" y="13" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">Steam</text>
+
+                            <rect id="casc-valve-body" x="336" y="52" width="32" height="26" rx="4" fill="#10b981" opacity="0.6"/>
+                            <rect x="336" y="52" width="32" height="26" rx="4" fill="none" stroke="#10b981" stroke-width="2"/>
+                            <rect id="casc-valve-stem" x="348" y="66" width="8" height="8" rx="1.5" fill="#f8fafc" pointer-events="none"/>
+                            <text id="casc-valve-label" x="378" y="68" fill="#10b981" font-size="11" font-family="JetBrains Mono, monospace" font-weight="600">50%</text>
+
+                            <rect x="344" y="78" width="16" height="108" fill="url(#cascMetalGrad)" stroke="#334155" stroke-width="1"/>
+
+                            <!-- ---------- Jacketed vessel ---------- -->
+                            <rect x="272" y="186" width="160" height="186" rx="10" fill="url(#cascJacketGrad)" stroke="#64748b" stroke-width="2"/>
+                            <g clip-path="url(#cascJacketClip)">
+                                <rect id="casc-jacket-fill" x="272" y="300" width="160" height="72" fill="#38bdf8" opacity="0.42"/>
+                            </g>
+
+                            <rect x="292" y="204" width="120" height="140" rx="5" fill="rgba(15,23,42,0.9)" stroke="#94a3b8" stroke-width="1.5"/>
+                            <g clip-path="url(#cascProductClip)">
+                                <rect id="casc-product-fill" x="292" y="284" width="120" height="60" fill="url(#cascProductGrad)"/>
+                            </g>
+
+                            <line x1="150" y1="242" x2="272" y2="242" stroke="#a78bfa" stroke-width="1" opacity="0.55"/>
+                            <line id="casc-tjsp-line" x1="272" y1="242" x2="432" y2="242" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6 4"/>
+                            <text id="casc-tjsp-label" x="148" y="234" fill="#a78bfa" font-size="9.5" font-family="JetBrains Mono, monospace" text-anchor="start">Tj,sp 80.0</text>
+
+                            <text x="352" y="196" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">Jacketed Vessel</text>
+                            <text id="casc-t2-label" x="352" y="272" fill="#f8fafc" font-size="15" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="700">25.0 °C</text>
+                            <text x="352" y="290" fill="#94a3b8" font-size="9.5" font-family="Inter, sans-serif" text-anchor="middle">Product out T2</text>
+                            <text id="casc-tj-label" x="446" y="380" fill="#38bdf8" font-size="10" font-family="JetBrains Mono, monospace">Jacket Tj 25.0 °C</text>
+
+                            <rect x="344" y="372" width="16" height="42" fill="url(#cascMetalGrad)" stroke="#334155" stroke-width="1"/>
+                            <line id="casc-product-flow" x1="352" y1="374" x2="352" y2="412" stroke="#f87171" stroke-width="3" stroke-dasharray="7 4" class="flow-line" opacity="0.8"/>
+                            <text x="368" y="412" fill="#fca5a5" font-size="10" font-family="Inter, sans-serif">Product out</text>
+
+                            <rect x="196" y="280" width="80" height="16" rx="3" fill="url(#cascMetalGrad)" stroke="#334155" stroke-width="1"/>
+                            <line id="casc-feed-flow" x1="202" y1="288" x2="272" y2="288" stroke="#22c55e" stroke-width="3" stroke-dasharray="7 4" class="flow-line" opacity="0.8"/>
+                            <text x="250" y="272" fill="#94a3b8" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">Feed Tin</text>
+
+                            <!-- ---------- Signal paths ---------- -->
+                            <path d="M 292 310 L 236 310 L 236 352 L 96 352 L 96 344" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#cascArrRed)"/>
+                            <text x="122" y="345" fill="#f87171" font-size="10" font-family="Inter, sans-serif">T2 meas</text>
+
+                            <path d="M 432 236 L 470 236 L 470 192 L 480 192" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#cascArrCyan)"/>
+                            <text x="470" y="252" fill="#38bdf8" font-size="10" font-family="Inter, sans-serif">Tj meas</text>
+
+                            <path id="casc-path-cascade" d="M 200 320 L 204 320 L 204 132 L 560 132 L 560 168" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#cascArrViolet)"/>
+                            <text x="250" y="112" fill="#a78bfa" font-size="10" font-family="Inter, sans-serif">Tj,sp — cascade setpoint</text>
+
+                            <path d="M 560 216 L 680 216 L 680 120 L 360 120" fill="none" stroke="#10b981" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#cascArrGreen)"/>
+                            <text x="672" y="136" fill="#10b981" font-size="10" font-family="Inter, sans-serif" text-anchor="end">valve %</text>
+
+                            <path id="casc-path-single" d="M 40 320 L 30 320 L 30 65 L 336 65" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="6 4" opacity="0.10" marker-end="url(#cascArrGreen)"/>
+                            <text x="66" y="88" fill="#f59e0b" font-size="10" font-family="Inter, sans-serif">single-loop direct path</text>
+
+                            <!-- ---------- Controllers ---------- -->
+                            <rect x="40" y="296" width="160" height="48" rx="8" fill="#111827" stroke="#ef4444" stroke-width="2"/>
+                            <text x="120" y="312" fill="#f87171" font-size="9.5" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">OUTER PID (TIC)</text>
+                            <text id="casc-outer-out" x="120" y="332" fill="#f8fafc" font-size="14" font-family="JetBrains Mono, monospace" text-anchor="middle">80.0 °C</text>
+
+                            <rect x="480" y="168" width="160" height="48" rx="8" fill="#111827" stroke="#a78bfa" stroke-width="2"/>
+                            <text x="560" y="184" fill="#a78bfa" font-size="9.5" font-family="Inter, sans-serif" text-anchor="middle" font-weight="700">INNER PID (TjC)</text>
+                            <text id="casc-inner-out" x="560" y="204" fill="#f8fafc" font-size="14" font-family="JetBrains Mono, monospace" text-anchor="middle">50 %</text>
+
+                            <!-- ---------- Status ---------- -->
+                            <rect x="40" y="360" width="176" height="58" rx="8" fill="#111827" stroke="#334155" stroke-width="1"/>
+                            <text id="casc-mode-label" x="52" y="380" fill="#a78bfa" font-size="11" font-family="Inter, sans-serif" font-weight="700">CASCADE</text>
+                            <text id="casc-time-label" x="52" y="396" fill="#94a3b8" font-size="10" font-family="JetBrains Mono, monospace">0.0 s</text>
+                            <text id="casc-u-label" x="52" y="410" fill="#94a3b8" font-size="10" font-family="JetBrains Mono, monospace">steam 50 %</text>
+
+                            <!-- ---------- Legend ---------- -->
+                            <line x1="230" y1="378" x2="252" y2="378" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="5 4"/>
+                            <text x="258" y="381" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif">outer measurement</text>
+                            <line x1="230" y1="394" x2="252" y2="394" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 4"/>
+                            <text x="258" y="397" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif">inner measurement</text>
+                            <line x1="230" y1="410" x2="252" y2="410" stroke="#a78bfa" stroke-width="1.6" stroke-dasharray="5 4"/>
+                            <text x="258" y="413" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif">cascade signal</text>
+                            <line x1="390" y1="378" x2="412" y2="378" stroke="#f59e0b" stroke-width="1.6" stroke-dasharray="5 4"/>
+                            <text x="418" y="381" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif">single-loop path</text>
+                            <line x1="390" y1="394" x2="412" y2="394" stroke="#10b981" stroke-width="1.6" stroke-dasharray="5 4"/>
+                            <text x="418" y="397" fill="#94a3b8" font-size="9" font-family="Inter, sans-serif">valve signal</text>
+                        </svg>
+                    </div>
+                    <div class="readout-row">
+                        <div class="readout-chip"><span class="rc-label">Product T2</span><span class="rc-value" id="ro-t2">25.00 °C</span></div>
+                        <div class="readout-chip"><span class="rc-label">Jacket Tj</span><span class="rc-value" id="ro-tj">25.00 °C</span></div>
+                        <div class="readout-chip"><span class="rc-label">Tj setpoint</span><span class="rc-value" id="ro-tjsp">80.00 °C</span></div>
+                        <div class="readout-chip"><span class="rc-label">Steam valve</span><span class="rc-value" id="ro-u">50.0 %</span></div>
+                        <div class="readout-chip"><span class="rc-label">Structure</span><span class="rc-value" id="ro-mode">cascade</span></div>
+                        <div class="readout-chip"><span class="rc-label">Error (SP − T2)</span><span class="rc-value" id="ro-err">55.000 °C</span></div>
+                    </div>
+                </div>
+
+                <div class="chart-tabs" id="chart-tabs">
+                    <button class="chart-tab active" data-chart="outer"><i class="fas fa-crosshairs"></i> Outer Loop</button>
+                    <button class="chart-tab" data-chart="inner"><i class="fas fa-fire-alt"></i> Inner Loop</button>
+                </div>
+                <div id="tab-outer">
+                    <div class="chart-caption"><span class="tag-pv">PV</span> Product temperature T2 and its setpoint</div>
+                    <div id="chart-t2" class="chart-plot stacked"></div>
+                    <div class="chart-caption"><span class="tag-pv">PV</span> Jacket temperature Tj and the setpoint handed down by the TIC</div>
+                    <div id="chart-tj" class="chart-plot stacked"></div>
+                </div>
+                <div id="tab-inner" style="display:none">
+                    <div class="chart-caption"><span class="tag-mv">MV</span> Steam valve opening, against the steam temperature disturbance</div>
+                    <div id="chart-u" class="chart-plot stacked"></div>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric-card"><div class="metric-label">Product T2</div><div class="metric-value" id="metric-t2">25.00 °C</div></div>
+                    <div class="metric-card"><div class="metric-label">Jacket Tj</div><div class="metric-value" id="metric-tj">25.00 °C</div></div>
+                    <div class="metric-card"><div class="metric-label">Steam</div><div class="metric-value" id="metric-u">50.0 %</div></div>
+                    <div class="metric-card"><div class="metric-label">Error T2</div><div class="metric-value" id="metric-ep">55.00 °C</div></div>
+                    <div class="metric-card"><div class="metric-label">Error Tj</div><div class="metric-value" id="metric-ej">—</div></div>
+                    <div class="metric-card"><div class="metric-label">IAE since step</div><div class="metric-value" id="metric-iae">0.0</div></div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= Documentation ================= -->
+        <section class="docs-section">
+            <h2 class="section-title">Parameters &amp; Equations</h2>
+            <p class="section-subtitle">Two-loop cascade control on a jacketed stirred-tank heater — everything the simulation does, written out.</p>
+            <div class="docs-grid">
+                <div class="docs-card">
+                    <h3>Concept</h3>
+                    <div class="equation">
+                        <span class="eq-label">Cascade structure</span>
+                        Outer: T<sub>j,sp</sub> = PID<sub>outer</sub>(T<sub>2,sp</sub> − T<sub>2</sub>)<br>
+                        Inner: u = PID<sub>inner</sub>(T<sub>j,sp</sub> − T<sub>j</sub>)
+                        <span class="eq-note">The outer (master) loop never touches the valve. It only asks the inner (slave) loop for a jacket temperature. The inner loop owns the valve.</span>
+                    </div>
+                    <p><strong>Why cascade?</strong> The inner loop is the fast one (τ<sub>j</sub> &lt; τ<sub>2</sub>), so steam-pressure and jacket disturbances are corrected inside the inner loop before they can reach the product. The outer loop then sees a much better-behaved, faster-acting plant.</p>
+                    <p><strong>The rule:</strong> cascade only pays when the inner loop is at least about three times faster than the outer one (here τ<sub>2</sub>/τ<sub>j</sub> = 8/3 ≈ 2.7). Drag τ<sub>j</sub> up towards τ<sub>2</sub> and the advantage disappears — the inner loop just adds lag.</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Plant Model</h3>
+                    <div class="equation">
+                        <span class="eq-label">Two energy balances</span>
+                        τ<sub>2</sub> · dT<sub>2</sub>/dt = (T<sub>j</sub> − T<sub>2</sub>) − K<sub>1</sub>(T<sub>2</sub> − T<sub>in</sub>)<br>
+                        τ<sub>j</sub> · dT<sub>j</sub>/dt = (T<sub>2</sub> − T<sub>j</sub>) + K<sub>s</sub>·(u/100)·(T<sub>steam</sub> − T<sub>j</sub>)
+                        <span class="eq-note">τ<sub>2</sub> = m<sub>2</sub>c<sub>p</sub>/UA · τ<sub>j</sub> = m<sub>j</sub>c<sub>p</sub>/UA · K<sub>1</sub> = wc<sub>p</sub>/UA · K<sub>s</sub> = UA<sub>s</sub>/UA</span>
+                    </div>
+                    <p><strong>Energy conserving.</strong> The coupling term (T<sub>j</sub> − T<sub>2</sub>) appears with <em>opposite signs</em> in the two equations: the heat the jacket loses is exactly the heat the vessel gains. Nothing is created, so the steady state is exact and the integral cannot drift.</p>
+                    <p><strong>Physically bounded.</strong> The jacket term is (T<sub>steam</sub> − T<sub>j</sub>), so as T<sub>j</sub> approaches T<sub>steam</sub> the jacket stops accepting heat. The product can never reach T<sub>steam</sub> — that is the authority limit which makes the single loop slow to recover from a steam upset.</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Steady State — Why the TIC Needs a Wide Range</h3>
+                    <div class="equation">
+                        <span class="eq-label">Setting both derivatives to zero</span>
+                        T<sub>j</sub> − T<sub>2</sub> = K<sub>1</sub>(T<sub>2</sub> − T<sub>in</sub>)<br>
+                        K<sub>s</sub>(u/100)(T<sub>steam</sub> − T<sub>j</sub>) = K<sub>1</sub>(T<sub>2</sub> − T<sub>in</sub>)
+                        <span class="eq-note">With K<sub>1</sub> = 0.5, T<sub>2</sub> = 80 °C, T<sub>in</sub> = 25 °C the jacket must sit 27.5 °C ABOVE the product.</span>
+                    </div>
+                    <p>The outer loop must therefore be allowed to ask for <strong>any</strong> jacket temperature between T<sub>in</sub> and T<sub>steam</sub>. That is exactly why the TIC's output limits are the physical window and not 0–100 %: its output is a temperature, not a valve position.</p>
+                    <p>The outer <em>integral</em> is what supplies that 27.5 °C offset. Because the TIC biases at the product setpoint (80 °C), it starts with zero output error and the integrator winds up to about 107.5 °C at the default conditions. Watch <em>T<sub>j,sp</sub></em> on the middle chart settle there.</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Parameters</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
+                        <tr><td class="sym">τ<sub>2</sub></td><td>Vessel capacity / UA</td><td class="def">8.0 s</td></tr>
+                        <tr><td class="sym">τ<sub>j</sub></td><td>Jacket capacity / UA</td><td class="def">3.0 s</td></tr>
+                        <tr><td class="sym">K<sub>1</sub></td><td>Through-flow number wc<sub>p</sub>/UA</td><td class="def">0.5</td></tr>
+                        <tr><td class="sym">K<sub>s</sub></td><td>Steam authority UA<sub>s</sub>/UA</td><td class="def">2.0</td></tr>
+                        <tr><td class="sym">θ</td><td>Steam transport delay</td><td class="def">1.0 s</td></tr>
+                        <tr><td class="sym">T<sub>in</sub></td><td>Feed temperature</td><td class="def">25 °C</td></tr>
+                        <tr><td class="sym">T<sub>steam</sub></td><td>Steam temperature</td><td class="def">140 °C</td></tr>
+                        <tr><td class="sym">T<sub>2,sp</sub></td><td>Product setpoint</td><td class="def">80 °C</td></tr>
+                        <tr><td class="sym">u</td><td>Steam valve (actuator)</td><td class="def">0–100 %</td></tr>
+                    </table>
+                </div>
+
+                <div class="docs-card">
+                    <h3>Controller Parameters</h3>
+                    <table class="param-table">
+                        <tr><th>Symbol</th><th>Meaning</th><th>Default (Outer / Inner)</th></tr>
+                        <tr><td class="sym">K<sub>p</sub></td><td>Proportional gain</td><td class="def">1.80 / 2.50</td></tr>
+                        <tr><td class="sym">K<sub>i</sub></td><td>Integral gain</td><td class="def">0.200 / 0.800</td></tr>
+                        <tr><td class="sym">K<sub>d</sub></td><td>Derivative gain</td><td class="def">0.50 / 0.20</td></tr>
+                        <tr><td class="sym">τ<sub>D</sub></td><td>Derivative filter time constant</td><td class="def">1.00 s</td></tr>
+                        <tr><td class="sym">β <span class="badge-eq two-dof">2-DOF</span></td><td>Proportional setpoint weight</td><td class="def">1.00</td></tr>
+                        <tr><td class="sym">γ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00</td></tr>
+                        <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup</td><td class="def">on</td></tr>
+                    </table>
+                    <p><strong>Single loop (for comparison):</strong> K<sub>p</sub> = 0.30, K<sub>i</sub> = 0.50, K<sub>d</sub> = 2.50. The single structure needs a derivative gain <em>five times</em> larger than the cascade outer loop to reach a comparable closed-loop speed, and still loses on a steam upset. That is the whole argument for cascade.</p>
+                    <p><strong>Bumpless transfer.</strong> The two structures bias at different values (the TIC at the product setpoint, the single loop at 50 %), so switching reloads the incoming controller's bias and integral to reproduce the signal already in service. Switch back and forth mid-run and the valve does not jump.</p>
+                </div>
+
+                <div class="docs-card">
+                    <h3>What to Try</h3>
+                    <p><strong>1 — Make the two loops race.</strong> Step <em>T<sub>steam</sub></em> from 140 °C down to 125 °C at 20x and watch. Both settle back to exactly the same place (T<sub>2</sub> = 80.000 °C, T<sub>j</sub> = 107.5 °C, valve 78.6 %), but the transients differ sharply:</p>
+                    <table class="param-table">
+                        <tr><th>Steam step 140 → 125 °C</th><th>Cascade</th><th>Single loop</th></tr>
+                        <tr><td>Peak T<sub>2</sub> deviation</td><td class="def">1.34 °C</td><td class="def">3.85 °C</td></tr>
+                        <tr><td>Time to within 0.1 °C</td><td class="def">15 s</td><td class="def">39 s</td></tr>
+                        <tr><td>IAE of the excursion</td><td class="def">23 °C·s</td><td class="def">92 °C·s</td></tr>
+                    </table>
+                    <p>The cascade cuts the peak excursion by about 3x and the integral of the error by about 4x. Click <em>Single Loop</em> and run the identical step to see it for yourself.</p>
+                    <p><strong>2 — Load the plant.</strong> Drop <em>T<sub>in</sub></em> from 25 to 10 °C. The jacket must now sit further above the product, so <em>T<sub>j,sp</sub></em> climbs. The inner loop tracks it without ever troubling T<sub>2</sub>.</p>
+                    <p><strong>3 — Break the speed hierarchy.</strong> Raise τ<sub>j</sub> from 3 s to 15 s. The inner loop is now slower than the outer one and the cascade performs no better than the single loop — sometimes worse.</p>
+                    <p><strong>4 — Attack the dead time.</strong> Push θ to 5 s. The inner loop starts to ring because the valve it commands takes 5 s to act on the jacket. This is the classic reason a cascade needs a fast secondary measurement.</p>
+                    <p><strong>5 — See the filter earn its place.</strong> Set σ = 1 °C and outer K<sub>d</sub> = 5. Then raise τ<sub>D</sub> from 1 s to 4 s: the valve stops chattering and the product trace cleans up.</p>
+                    <p><strong>6 — Remove the safety net.</strong> Untick <em>anti-reset windup</em>, drive the setpoint to 130 °C so the valve saturates at 100 %, then bring it back to 70 °C. The valve stays pinned at 100 % for a long time while the wound-up integral unwinds.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/pid-controller.js"></script>
+    <script src="js/cascade-control.js"></script>
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.getElementById('nav-links').classList.toggle('open');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>
+
