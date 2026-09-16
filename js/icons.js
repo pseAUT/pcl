@@ -8,6 +8,11 @@
     'use strict';
     var ICONS = {
         'fa-wave-square': '<path d="M2 16h5V8h5v8h5V8h5" fill="none" stroke="black" stroke-width="2.4" stroke-linejoin="round"/>',
+        'fa-layer-group': '<path d="M12 2 2 7l10 5 10-5Z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/>',
+        'fa-crosshairs': '<circle cx="12" cy="12" r="4.6" fill="none" stroke="black" stroke-width="1.9"/><circle cx="12" cy="12" r="1.2"/><path d="M12 1.8v3.6M12 18.6v3.6M1.8 12h3.6M18.6 12h3.6" fill="none" stroke="black" stroke-width="1.9" stroke-linecap="round"/>',
+        'fa-fire-alt': '<path d="M12 2c1.5 4 6 6 6 11a6 6 0 0 1-12 0c0-3.5 3-5.5 4-8.5.8 1.8 2 2.5 2 4.5 1-2 .5-5 0-7Z"/><path d="M12 14v3c1.5 0 2-.8 2-2 0-1.2-.8-1.5-2-1Z"/>',
+        'fa-code-branch': '<circle cx="6.5" cy="5.5" r="2.2" fill="none" stroke="black" stroke-width="1.9"/><circle cx="6.5" cy="18.5" r="2.2" fill="none" stroke="black" stroke-width="1.9"/><circle cx="17.5" cy="5.5" r="2.2" fill="none" stroke="black" stroke-width="1.9"/><path d="M8.7 5.5H12a3.5 3.5 0 0 1 3.5 3.5v3.5" fill="none" stroke="black" stroke-width="1.9"/><path d="M8.7 18.5H12a3.5 3.5 0 0 0 3.5-3.5v-1.5" fill="none" stroke="black" stroke-width="1.9"/>',
+        'fa-random': '<path d="M3 8h13.2l4.3-3.2M3 16h13.2l4.3 3.2" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
         'fa-water': '<path d="M12 3C12 3 5.5 11 5.5 15a6.5 6.5 0 0 0 13 0C18.5 11 12 3 12 3Z"/>',
         'fa-fire': '<path d="M12 2c1.5 4 6 6 6 11a6 6 0 0 1-12 0c0-3.5 3-5.5 4-8.5.8 1.8 2 2.5 2 4.5 1-2 .5-5 0-7Z"/>',
         'fa-flask': '<path d="M9 3h6v5l4 10a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3L9 8Z"/>',
