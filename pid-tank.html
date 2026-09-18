@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PID Tank Level Control â€” PDC Lab</title>
+    <title>PID Tank Level Control — PDC Lab</title>
     <link rel="stylesheet" href="styles.css">
     <script src="js/icons.js"></script>
     <script src="js/theme.js"></script>
@@ -43,7 +43,7 @@
 
     <div class="example-page">
         <div class="page-header">
-            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab Â· Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
             <h1><i class="fas fa-water" style="color:var(--primary);"></i> PID Tank Level Control</h1>
             <p>Real-time simulation with animated tank schematic. Run/pause and adjust speed from 1x to 100x.</p>
         </div>
@@ -72,7 +72,7 @@
                     </div>
                     <div class="slider-group" style="margin-top:0.75rem;">
                         <div class="slider-header">
-                            <span class="slider-label">t_end â€” Simulation Time (s)</span>
+                            <span class="slider-label">t_end — Simulation Time (s)</span>
                             <input type="number" id="tend" class="num-input" min="1" max="600" step="1" value="30" inputmode="decimal">
                         </div>
                         <p class="hint">Type the simulation time and press <strong>Enter</strong> to apply.</p>
@@ -84,21 +84,21 @@
                     <h3>PID Controller Gains</h3>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Kp â€” Proportional</span>
+                            <span class="slider-label">Kp — Proportional</span>
                             <span class="slider-value" id="kp-val">2.0</span>
                         </div>
                         <input type="range" id="kp" min="0" max="20" step="0.1" value="2.0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Ki â€” Integral</span>
+                            <span class="slider-label">Ki — Integral</span>
                             <span class="slider-value" id="ki-val">0.5</span>
                         </div>
                         <input type="range" id="ki" min="0" max="10" step="0.05" value="0.5">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Kd â€” Derivative</span>
+                            <span class="slider-label">Kd — Derivative</span>
                             <span class="slider-value" id="kd-val">0.0</span>
                         </div>
                         <input type="range" id="kd" min="0" max="10" step="0.05" value="0.0">
@@ -110,28 +110,28 @@
                     <h3>Controller Options (HYSYS-style)</h3>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Î² â€” P Setpoint Weight</span>
+                            <span class="slider-label">β — P Setpoint Weight</span>
                             <span class="slider-value" id="beta-val">1.00</span>
                         </div>
                         <input type="range" id="beta" min="0" max="1" step="0.05" value="1">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Î³ â€” D Setpoint Weight</span>
+                            <span class="slider-label">γ — D Setpoint Weight</span>
                             <span class="slider-value" id="gamma-val">0.00</span>
                         </div>
                         <input type="range" id="gamma" min="0" max="1" step="0.05" value="0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">PV Noise Ïƒ (m)</span>
+                            <span class="slider-label">PV Noise σ (m)</span>
                             <span class="slider-value" id="noise-val">0.000</span>
                         </div>
                         <input type="range" id="noise" min="0" max="0.5" step="0.001" value="0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Î± â€” Derivative Filter (0 = off)</span>
+                            <span class="slider-label">α — Derivative Filter (0 = off)</span>
                             <span class="slider-value" id="alpha-val">0.00</span>
                         </div>
                         <input type="range" id="alpha" min="0" max="0.95" step="0.05" value="0">
@@ -140,7 +140,7 @@
                         <input type="checkbox" id="antiwindup" checked>
                         <span>Anti-reset windup (back-calculation)</span>
                     </label>
-                    <p class="hint">Î² &lt; 1 softens the setpoint response (2-DOF). Î³ = 0 uses derivative-on-measurement. Turn windup off to see integral windup during saturation.</p>
+                    <p class="hint">β &lt; 1 softens the setpoint response (2-DOF). γ = 0 uses derivative-on-measurement. Turn windup off to see integral windup during saturation.</p>
                 </div>
 
                 <!-- System Settings -->
@@ -155,7 +155,7 @@
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Tank Area (mÂ²)</span>
+                            <span class="slider-label">Tank Area (m²)</span>
                             <span class="slider-value" id="area-val">2.0</span>
                         </div>
                         <input type="range" id="tank-area" min="0.5" max="5" step="0.1" value="2.0">
@@ -169,7 +169,7 @@
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Disturbance (mÂ³/s)</span>
+                            <span class="slider-label">Disturbance (m³/s)</span>
                             <span class="slider-value" id="dist-val">0.0</span>
                         </div>
                         <input type="range" id="disturbance" min="-2" max="2" step="0.1" value="0.0">
@@ -204,8 +204,8 @@
                 <div class="panel-section">
                     <div class="formula-box">
                         <span class="formula-label">Transfer Function</span>
-                        G(s) = 1 / (AÂ·s + 1/R)<br>
-                        Controller: u = u<sub>bias</sub> + Kp(Î²Â·SP âˆ’ h) + KiÂ·âˆ«(SP âˆ’ h)dt + Kd(Î³Â·dSP/dt âˆ’ dh/dt)
+                        G(s) = 1 / (A·s + 1/R)<br>
+                        Controller: u = u<sub>bias</sub> + Kp(β·SP − h) + Ki·∫(SP − h)dt + Kd(γ·dSP/dt − dh/dt)
                     </div>
                 </div>
             </div>
@@ -322,18 +322,18 @@
                             <path d="M 45 350 L 45 370 L 200 370 L 200 358" stroke="#0ea5e9" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
 
                             <!-- Tank Label -->
-                            <text x="200" y="415" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="500">Process Tank (A = <tspan id="svg-tank-area">2.0</tspan> mÂ²)</text>
+                            <text x="200" y="415" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif" text-anchor="middle" font-weight="500">Process Tank (A = <tspan id="svg-tank-area">2.0</tspan> m²)</text>
                         </svg>
                     </div>
                 </div>
 
                 <!-- Charts: each MV directly below its PV -->
                 <div class="chart-container">
-                    <div class="chart-caption"><span class="tag-pv">PV</span> Tank Level h â€” process variable</div>
+                    <div class="chart-caption"><span class="tag-pv">PV</span> Tank Level h — process variable</div>
                     <div id="chart-tank" class="chart-plot stacked"></div>
-                    <div class="chart-caption"><span class="tag-mv">MV</span> Inflow q<sub>in</sub> â€” manipulated variable</div>
+                    <div class="chart-caption"><span class="tag-mv">MV</span> Inflow q<sub>in</sub> — manipulated variable</div>
                     <div id="chart-control" class="chart-plot stacked"></div>
-                    <div class="chart-caption"><span class="tag-err">e</span> Error (SP âˆ’ h)</div>
+                    <div class="chart-caption"><span class="tag-err">e</span> Error (SP − h)</div>
                     <div id="chart-error" class="chart-plot stacked"></div>
                 </div>
 
@@ -357,11 +357,11 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Settling Time</div>
-                        <div class="metric-value" id="metric-settling">â€” s</div>
+                        <div class="metric-value" id="metric-settling">— s</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">SSE</div>
-                        <div class="metric-value" id="metric-sse">â€”</div>
+                        <div class="metric-value" id="metric-sse">—</div>
                     </div>
                 </div>
             </div>
@@ -375,39 +375,39 @@
                     <h3>Process Model</h3>
                     <div class="equation">
                         <span class="eq-label">Tank mass balance</span>
-                        A Â· dh/dt = q<sub>in</sub> âˆ’ h/R + d
-                        <span class="eq-note">h â€” level (m) Â· q<sub>in</sub> â€” inflow (mÂ³/s) Â· A â€” cross-section (mÂ²) Â· R â€” outflow resistance Â· d â€” disturbance inflow (mÂ³/s)</span>
+                        A · dh/dt = q<sub>in</sub> − h/R + d
+                        <span class="eq-note">h — level (m) · q<sub>in</sub> — inflow (m³/s) · A — cross-section (m²) · R — outflow resistance · d — disturbance inflow (m³/s)</span>
                     </div>
                     <div class="equation">
                         <span class="eq-label">Steady state (open loop)</span>
-                        h<sub>ss</sub> = R Â· (q<sub>in</sub> + d)
-                        <span class="eq-note">Time constant Ï„ = AÂ·R. With A = 2, R = 1 â†’ Ï„ = 2 s.</span>
+                        h<sub>ss</sub> = R · (q<sub>in</sub> + d)
+                        <span class="eq-note">Time constant τ = A·R. With A = 2, R = 1 → τ = 2 s.</span>
                     </div>
                 </div>
 
                 <div class="docs-card">
-                    <h3>Controller â€” 2-DOF PID <span class="badge-eq two-dof">2-DOF</span></h3>
+                    <h3>Controller — 2-DOF PID <span class="badge-eq two-dof">2-DOF</span></h3>
                     <div class="equation">
                         <span class="eq-label">Control law</span>
-                        q<sub>in</sub> = clamp[ K<sub>p</sub>(Î²Â·SP âˆ’ h) + K<sub>i</sub>âˆ«(SP âˆ’ h)dt + K<sub>d</sub>(Î³Â·dSP/dt âˆ’ dh/dt), 0, 20 ]
-                        <span class="eq-note">error e = SP âˆ’ h. Integral uses the full error; derivative uses the weighted setpoint minus the measurement.</span>
+                        q<sub>in</sub> = clamp[ K<sub>p</sub>(β·SP − h) + K<sub>i</sub>∫(SP − h)dt + K<sub>d</sub>(γ·dSP/dt − dh/dt), 0, 20 ]
+                        <span class="eq-note">error e = SP − h. Integral uses the full error; derivative uses the weighted setpoint minus the measurement.</span>
                     </div>
-                    <p><strong>Î² (beta)</strong> is the proportional setpoint weight. Î² = 1 is a standard PID; Î² &lt; 1 reacts more gently to setpoint changes (less overshoot) while still rejecting disturbances at full gain.</p>
-                    <p><strong>Î³ (gamma)</strong> is the derivative setpoint weight. Î³ = 0 gives derivative-on-measurement (no derivative "kick"); Î³ = 1 gives derivative-on-error.</p>
+                    <p><strong>β (beta)</strong> is the proportional setpoint weight. β = 1 is a standard PID; β &lt; 1 reacts more gently to setpoint changes (less overshoot) while still rejecting disturbances at full gain.</p>
+                    <p><strong>γ (gamma)</strong> is the derivative setpoint weight. γ = 0 gives derivative-on-measurement (no derivative "kick"); γ = 1 gives derivative-on-error.</p>
                 </div>
 
                 <div class="docs-card">
                     <h3>Parameters</h3>
                     <table class="param-table">
                         <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
-                        <tr><td class="sym">A</td><td>Tank cross-section area</td><td class="def">2.0 mÂ²</td></tr>
+                        <tr><td class="sym">A</td><td>Tank cross-section area</td><td class="def">2.0 m²</td></tr>
                         <tr><td class="sym">R</td><td>Outflow resistance</td><td class="def">1.0</td></tr>
                         <tr><td class="sym">SP</td><td>Level setpoint</td><td class="def">5.0 m</td></tr>
-                        <tr><td class="sym">d</td><td>Disturbance inflow</td><td class="def">0.0 mÂ³/s</td></tr>
+                        <tr><td class="sym">d</td><td>Disturbance inflow</td><td class="def">0.0 m³/s</td></tr>
                         <tr><td class="sym">K<sub>p</sub></td><td>Proportional gain</td><td class="def">2.0</td></tr>
                         <tr><td class="sym">K<sub>i</sub></td><td>Integral gain</td><td class="def">0.5</td></tr>
                         <tr><td class="sym">K<sub>d</sub></td><td>Derivative gain</td><td class="def">0.0</td></tr>
-                        <tr><td class="sym">q<sub>in</sub></td><td>Inflow (actuator, clamped)</td><td class="def">0â€“20 mÂ³/s</td></tr>
+                        <tr><td class="sym">q<sub>in</sub></td><td>Inflow (actuator, clamped)</td><td class="def">0–20 m³/s</td></tr>
                     </table>
                 </div>
 
@@ -415,15 +415,15 @@
                     <h3>Controller Options</h3>
                     <table class="param-table">
                         <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
-                        <tr><td class="sym">Î² <span class="badge-eq two-dof">2-DOF</span></td><td>Proportional setpoint weight</td><td class="def">1.00</td></tr>
-                        <tr><td class="sym">Î³ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00</td></tr>
-                        <tr><td class="sym">Î± <span class="badge-eq filter">filter</span></td><td>Derivative filter (0 = off)</td><td class="def">0.00</td></tr>
-                        <tr><td class="sym">Ïƒ <span class="badge-eq noise">noise</span></td><td>PV sensor noise std-dev</td><td class="def">0.00 m</td></tr>
+                        <tr><td class="sym">β <span class="badge-eq two-dof">2-DOF</span></td><td>Proportional setpoint weight</td><td class="def">1.00</td></tr>
+                        <tr><td class="sym">γ <span class="badge-eq two-dof">2-DOF</span></td><td>Derivative setpoint weight</td><td class="def">0.00</td></tr>
+                        <tr><td class="sym">α <span class="badge-eq filter">filter</span></td><td>Derivative filter (0 = off)</td><td class="def">0.00</td></tr>
+                        <tr><td class="sym">σ <span class="badge-eq noise">noise</span></td><td>PV sensor noise std-dev</td><td class="def">0.00 m</td></tr>
                         <tr><td class="sym">AW <span class="badge-eq windup">windup</span></td><td>Anti-reset windup (back-calculation)</td><td class="def">on</td></tr>
                     </table>
-                    <p><strong>Anti-reset windup (back-calculation):</strong> when the inflow saturates at its limit, the integral is bled by the over-drive I â† I + (Î”t/T<sub>t</sub>)(u<sub>sat</sub> âˆ’ u), so it cannot "wind up". Turn it off to see the slow recovery caused by windup.</p>
-                    <p><strong>PV noise:</strong> a zero-mean Gaussian noise of standard deviation Ïƒ is added to the measured level only (the true level stays clean): h<sub>meas</sub> = h + ÏƒÂ·N(0,1).</p>
-                    <p><strong>Derivative filter (Î±):</strong> the raw derivative is smoothed by a first-order filter D<sub>f</sub>[k] = aÂ·D<sub>f</sub>[kâˆ’1] + (1âˆ’a)Â·D<sub>raw</sub>[k] with a = exp(âˆ’Î”t/Ï„), where Ï„ is a physical time constant set from Î±. Î± = 0 disables filtering; larger Î± suppresses noise amplification at the cost of a small lag.</p>
+                    <p><strong>Anti-reset windup (back-calculation):</strong> when the inflow saturates at its limit, the integral is bled by the over-drive I ← I + (Δt/T<sub>t</sub>)(u<sub>sat</sub> − u), so it cannot "wind up". Turn it off to see the slow recovery caused by windup.</p>
+                    <p><strong>PV noise:</strong> a zero-mean Gaussian noise of standard deviation σ is added to the measured level only (the true level stays clean): h<sub>meas</sub> = h + σ·N(0,1).</p>
+                    <p><strong>Derivative filter (α):</strong> the raw derivative is smoothed by a first-order filter D<sub>f</sub>[k] = a·D<sub>f</sub>[k−1] + (1−a)·D<sub>raw</sub>[k] with a = exp(−Δt/τ), where τ is a physical time constant set from α. α = 0 disables filtering; larger α suppresses noise amplification at the cost of a small lag.</p>
                 </div>
             </div>
         </section>

@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>CSTR Thermal Runaway â€” PDC Lab</title>
+    <title>CSTR Thermal Runaway — PDC Lab</title>
     <link rel="stylesheet" href="styles.css">
     <script src="js/icons.js"></script>
     <script src="js/theme.js"></script>
@@ -46,7 +46,7 @@
 
     <div class="example-page">
         <div class="page-header">
-            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab Â· Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
             <h1><i class="fas fa-fire" style="color:#ef4444;"></i> CSTR Thermal Runaway</h1>
             <p>Continuous stirred-tank reactor with an exothermic reaction. Tune the kinetics, feed and cooling, set the simulation time, then solve the stiff ODE system with the built-in adaptive solver.</p>
             <div class="mode-tabs">
@@ -88,7 +88,7 @@
                     <h3>Simulation Time &amp; Solver</h3>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">t_end â€” Simulation Time (s)</span>
+                            <span class="slider-label">t_end — Simulation Time (s)</span>
                             <input type="number" id="tend" class="num-input" min="1" max="60" step="0.5" value="20" inputmode="decimal">
                         </div>
                         <p class="hint">Type the simulation time and press <strong>Enter</strong> to apply.</p>
@@ -99,8 +99,8 @@
                         </div>
                         <select id="method" class="select-control">
                             <option value="auto" selected>Auto (adaptive, detects stiffness)</option>
-                            <option value="rk45">RK45 â€” explicit (non-stiff)</option>
-                            <option value="trbdf2">TR-BDF2 â€” implicit (stiff)</option>
+                            <option value="rk45">RK45 — explicit (non-stiff)</option>
+                            <option value="trbdf2">TR-BDF2 — implicit (stiff)</option>
                         </select>
                     </div>
                     <div class="slider-group">
@@ -108,9 +108,9 @@
                             <span class="slider-label">Accuracy (tolerance)</span>
                         </div>
                         <select id="accuracy" class="select-control">
-                            <option value="fast">Fast Â· rtol 1e-4</option>
-                            <option value="balanced" selected>Balanced Â· rtol 1e-6</option>
-                            <option value="accurate">Accurate Â· rtol 1e-7</option>
+                            <option value="fast">Fast · rtol 1e-4</option>
+                            <option value="balanced" selected>Balanced · rtol 1e-6</option>
+                            <option value="accurate">Accurate · rtol 1e-7</option>
                         </select>
                     </div>
                     <div class="solver-status" id="solver-status">Ready.</div>
@@ -121,77 +121,77 @@
                     <h3>Reactor Parameters</h3>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">C<sub>Ain</sub> â€” Feed Conc.</span>
+                            <span class="slider-label">C<sub>Ain</sub> — Feed Conc.</span>
                             <span class="slider-value" id="cain-val">1.00</span>
                         </div>
                         <input type="range" id="cain" min="0.2" max="2" step="0.01" value="1">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">q â€” Flow (mÂ³/s)</span>
+                            <span class="slider-label">q — Flow (m³/s)</span>
                             <span class="slider-value" id="q-val">100</span>
                         </div>
                         <input type="range" id="q" min="10" max="300" step="1" value="100">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">V â€” Volume (mÂ³)</span>
+                            <span class="slider-label">V — Volume (m³)</span>
                             <span class="slider-value" id="vol-val">100</span>
                         </div>
                         <input type="range" id="vol" min="10" max="300" step="1" value="100">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">T<sub>i</sub> â€” Feed Temp (K)</span>
+                            <span class="slider-label">T<sub>i</sub> — Feed Temp (K)</span>
                             <span class="slider-value" id="ti-val">350</span>
                         </div>
                         <input type="range" id="ti" min="280" max="450" step="1" value="350">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">T<sub>c</sub> â€” Coolant Temp (K)</span>
+                            <span class="slider-label">T<sub>c</sub> — Coolant Temp (K)</span>
                             <span class="slider-value" id="tc-val">305</span>
                         </div>
                         <input type="range" id="tc" min="250" max="450" step="1" value="305">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">UA â€” Heat Transfer (W/K)</span>
+                            <span class="slider-label">UA — Heat Transfer (W/K)</span>
                             <span class="slider-value" id="ua-val">50.0k</span>
                         </div>
                         <input type="range" id="ua" min="0" max="200000" step="1000" value="50000">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">kâ‚€ â€” Pre-exponential (1/s)</span>
+                            <span class="slider-label">k₀ — Pre-exponential (1/s)</span>
                             <span class="slider-value" id="k0-val">7.2e10</span>
                         </div>
                         <input type="range" id="k0" min="8" max="14" step="0.05" value="10.857">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">E/R â€” Activation (K)</span>
+                            <span class="slider-label">E/R — Activation (K)</span>
                             <span class="slider-value" id="eoverr-val">8750</span>
                         </div>
                         <input type="range" id="eoverr" min="4000" max="15000" step="50" value="8750">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Î”H<sub>r</sub> â€” Heat of Reaction</span>
+                            <span class="slider-label">ΔH<sub>r</sub> — Heat of Reaction</span>
                             <span class="slider-value" id="dhr-val">-5.0e4</span>
                         </div>
                         <input type="range" id="dhr" min="-200000" max="-10000" step="1000" value="-50000">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Ï â€” Density (kg/mÂ³)</span>
+                            <span class="slider-label">ρ — Density (kg/m³)</span>
                             <span class="slider-value" id="rho-val">1000</span>
                         </div>
                         <input type="range" id="rho" min="500" max="2000" step="10" value="1000">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">C<sub>p</sub> â€” Heat Capacity</span>
+                            <span class="slider-label">C<sub>p</sub> — Heat Capacity</span>
                             <span class="slider-value" id="cp-val">0.239</span>
                         </div>
                         <input type="range" id="cp" min="0.1" max="1" step="0.001" value="0.239">
@@ -222,10 +222,10 @@
                 <div class="panel-section">
                     <div class="formula-box">
                         <span class="formula-label">CSTR Mole &amp; Energy Balance</span>
-                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> âˆ’ C<sub>A</sub>) âˆ’ kÂ·C<sub>A</sub><br>
-                        dT/dt = (q/V)(T<sub>i</sub> âˆ’ T) âˆ’ Î”H<sub>r</sub>Â·kÂ·C<sub>A</sub>/(ÏC<sub>p</sub>)<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ UA(T<sub>c</sub> âˆ’ T)/(ÏC<sub>p</sub>V)<br>
-                        k = kâ‚€Â·exp(âˆ’E/RÂ·T)
+                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> − C<sub>A</sub>) − k·C<sub>A</sub><br>
+                        dT/dt = (q/V)(T<sub>i</sub> − T) − ΔH<sub>r</sub>·k·C<sub>A</sub>/(ρC<sub>p</sub>)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ UA(T<sub>c</sub> − T)/(ρC<sub>p</sub>V)<br>
+                        k = k₀·exp(−E/R·T)
                     </div>
                     <div class="info-box" style="margin-top:0.75rem;">
                         <strong>Stiff system.</strong> The Arrhenius term makes the Jacobian grow by orders of magnitude during ignition, so an L-stable implicit method is required.
@@ -291,7 +291,7 @@
                             <rect x="16" y="112" width="92" height="16" rx="3" fill="url(#metalGrad)" stroke="#334155" stroke-width="1"/>
                             <line x1="16" y1="120" x2="96" y2="120" stroke="#0ea5e9" stroke-width="3.5" stroke-dasharray="8 4" class="flow-line"/>
                             <polygon points="92,113 104,120 92,127" fill="#0ea5e9"/>
-                            <text x="16" y="102" fill="#7dd3fc" font-size="11" font-family="Inter, sans-serif" font-weight="600">Feed Â· C<tspan baseline-shift="sub" font-size="8">Ain</tspan>, T<tspan baseline-shift="sub" font-size="8">i</tspan></text>
+                            <text x="16" y="102" fill="#7dd3fc" font-size="11" font-family="Inter, sans-serif" font-weight="600">Feed · C<tspan baseline-shift="sub" font-size="8">Ain</tspan>, T<tspan baseline-shift="sub" font-size="8">i</tspan></text>
 
                             <!-- Product: leaves the vessel at the bottom -->
                             <rect x="192" y="330" width="16" height="56" rx="3" fill="url(#metalGrad)" stroke="#334155" stroke-width="1"/>
@@ -348,35 +348,35 @@
                 <div class="metrics-row">
                     <div class="metric-card">
                         <div class="metric-label">Peak Temp</div>
-                        <div class="metric-value" id="metric-peak-t">â€” K</div>
+                        <div class="metric-value" id="metric-peak-t">— K</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Time to Peak</div>
-                        <div class="metric-value" id="metric-peak-time">â€” s</div>
+                        <div class="metric-value" id="metric-peak-time">— s</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Final T</div>
-                        <div class="metric-value" id="metric-final-t">â€” K</div>
+                        <div class="metric-value" id="metric-final-t">— K</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Final C<sub>A</sub></div>
-                        <div class="metric-value" id="metric-final-ca">â€”</div>
+                        <div class="metric-value" id="metric-final-ca">—</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Conversion</div>
-                        <div class="metric-value" id="metric-conv">â€” %</div>
+                        <div class="metric-value" id="metric-conv">— %</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Max dT/dt</div>
-                        <div class="metric-value" id="metric-rate">â€” K/s</div>
+                        <div class="metric-value" id="metric-rate">— K/s</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Solver</div>
-                        <div class="metric-value" id="metric-method">â€”</div>
+                        <div class="metric-value" id="metric-method">—</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Steps</div>
-                        <div class="metric-value" id="metric-steps">â€”</div>
+                        <div class="metric-value" id="metric-steps">—</div>
                     </div>
                 </div>
             </div>
@@ -390,15 +390,15 @@
                     <h3>Reactor Model</h3>
                     <div class="equation">
                         <span class="eq-label">Mole balance</span>
-                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> âˆ’ C<sub>A</sub>) âˆ’ kÂ·C<sub>A</sub>
+                        dC<sub>A</sub>/dt = (q/V)(C<sub>Ain</sub> − C<sub>A</sub>) − k·C<sub>A</sub>
                     </div>
                     <div class="equation">
                         <span class="eq-label">Energy balance</span>
-                        dT/dt = (q/V)(T<sub>i</sub> âˆ’ T) âˆ’ Î”H<sub>r</sub>Â·kÂ·C<sub>A</sub>/(ÏC<sub>p</sub>) + UA(T<sub>c</sub> âˆ’ T)/(ÏC<sub>p</sub>V)
+                        dT/dt = (q/V)(T<sub>i</sub> − T) − ΔH<sub>r</sub>·k·C<sub>A</sub>/(ρC<sub>p</sub>) + UA(T<sub>c</sub> − T)/(ρC<sub>p</sub>V)
                     </div>
                     <div class="equation">
                         <span class="eq-label">Arrhenius rate</span>
-                        k = k<sub>0</sub>Â·exp(âˆ’(E/R)/T)
+                        k = k<sub>0</sub>·exp(−(E/R)/T)
                         <span class="eq-note">The state is y = [C<sub>A</sub>, T]; this is a stiff, non-linear system.</span>
                     </div>
                 </div>
@@ -407,8 +407,8 @@
                     <h3>Numerical Solver</h3>
                     <div class="equation">
                         <span class="eq-label">Adaptive integration of dy/dt = f(t, y)</span>
-                        RK45 â€” explicit Dormandâ€“Prince (non-stiff)<br>
-                        TR-BDF2 â€” implicit, L-stable (stiff)<br>
+                        RK45 — explicit Dormand–Prince (non-stiff)<br>
+                        TR-BDF2 — implicit, L-stable (stiff)<br>
                         <span class="eq-note">Error is controlled by rtol/atol; the step size adapts to the local error.</span>
                     </div>
                     <p><strong>Accuracy:</strong> Fast (rtol 1e-4), Balanced (1e-6, default), Accurate (1e-7).</p>
@@ -419,15 +419,15 @@
                     <table class="param-table">
                         <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
                         <tr><td class="sym">C<sub>Ain</sub></td><td>Feed concentration</td><td class="def">1.00 mol/L</td></tr>
-                        <tr><td class="sym">q</td><td>Volumetric flow</td><td class="def">100 mÂ³/s</td></tr>
-                        <tr><td class="sym">V</td><td>Reactor volume</td><td class="def">100 mÂ³</td></tr>
+                        <tr><td class="sym">q</td><td>Volumetric flow</td><td class="def">100 m³/s</td></tr>
+                        <tr><td class="sym">V</td><td>Reactor volume</td><td class="def">100 m³</td></tr>
                         <tr><td class="sym">T<sub>i</sub></td><td>Feed temperature</td><td class="def">350 K</td></tr>
                         <tr><td class="sym">T<sub>c</sub></td><td>Coolant temperature</td><td class="def">305 K</td></tr>
-                        <tr><td class="sym">UA</td><td>Heat-transfer coefficient</td><td class="def">5.0Ã—10â´ W/K</td></tr>
-                        <tr><td class="sym">k<sub>0</sub></td><td>Pre-exponential factor</td><td class="def">7.2Ã—10Â¹â° 1/s</td></tr>
+                        <tr><td class="sym">UA</td><td>Heat-transfer coefficient</td><td class="def">5.0×10⁴ W/K</td></tr>
+                        <tr><td class="sym">k<sub>0</sub></td><td>Pre-exponential factor</td><td class="def">7.2×10¹⁰ 1/s</td></tr>
                         <tr><td class="sym">E/R</td><td>Activation temperature</td><td class="def">8750 K</td></tr>
-                        <tr><td class="sym">Î”H<sub>r</sub></td><td>Heat of reaction</td><td class="def">âˆ’5.0Ã—10â´</td></tr>
-                        <tr><td class="sym">Ï</td><td>Density</td><td class="def">1000 kg/mÂ³</td></tr>
+                        <tr><td class="sym">ΔH<sub>r</sub></td><td>Heat of reaction</td><td class="def">−5.0×10⁴</td></tr>
+                        <tr><td class="sym">ρ</td><td>Density</td><td class="def">1000 kg/m³</td></tr>
                         <tr><td class="sym">C<sub>p</sub></td><td>Heat capacity</td><td class="def">0.239</td></tr>
                     </table>
                 </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Second-Order System Response â€” PDC Lab</title>
+    <title>Second-Order System Response — PDC Lab</title>
     <link rel="stylesheet" href="styles.css">
     <script src="js/icons.js"></script>
     <script src="js/theme.js"></script>
@@ -43,9 +43,9 @@
 
     <div class="example-page">
         <div class="page-header">
-            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab Â· Amirkabir University of Technology (Tehran's Polytechnic)</div>
+            <div class="page-institution"><i class="fas fa-university"></i> PSE Lab · Amirkabir University of Technology (Tehran's Polytechnic)</div>
             <h1><i class="fas fa-chart-area" style="color:#06b6d4;"></i> Second-Order System Response</h1>
-            <p>Investigate underdamped, critically damped, and overdamped responses by tuning Î¶ and Ï‰n.</p>
+            <p>Investigate underdamped, critically damped, and overdamped responses by tuning ζ and ωn.</p>
         </div>
 
         <div class="page-layout">
@@ -55,14 +55,14 @@
                     <h3>System Parameters</h3>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Î¶ â€” Damping Ratio</span>
+                            <span class="slider-label">ζ — Damping Ratio</span>
                             <span class="slider-value" id="zeta-val">0.30</span>
                         </div>
                         <input type="range" id="zeta" min="0.05" max="3" step="0.01" value="0.3">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <span class="slider-label">Ï‰n â€” Natural Frequency (rad/s)</span>
+                            <span class="slider-label">ωn — Natural Frequency (rad/s)</span>
                             <span class="slider-value" id="wn-val">2.0</span>
                         </div>
                         <input type="range" id="wn" min="0.1" max="10" step="0.1" value="2.0">
@@ -72,10 +72,10 @@
                 <div class="panel-section">
                     <h3>System Type</h3>
                     <div id="system-type" class="status-badge underdamped">
-                        <i class="fas fa-wave-square"></i> Underdamped (Î¶ &lt; 1)
+                        <i class="fas fa-wave-square"></i> Underdamped (ζ &lt; 1)
                     </div>
                     <div class="info-box" style="margin-top:0.75rem;" id="system-info">
-                        <strong>Underdamped</strong> â€” The system oscillates before settling. Common in lightly damped mechanical and electrical systems.
+                        <strong>Underdamped</strong> — The system oscillates before settling. Common in lightly damped mechanical and electrical systems.
                     </div>
                 </div>
 
@@ -94,11 +94,11 @@
                 <div class="panel-section">
                     <div class="formula-box">
                         <span class="formula-label">Transfer Function</span>
-                        G(s) = Ï‰nÂ² / (sÂ² + 2Î¶Ï‰nÂ·s + Ï‰nÂ²)
+                        G(s) = ωn² / (s² + 2ζωn·s + ωn²)
                     </div>
                     <div class="formula-box" style="margin-top:0.75rem;">
                         <span class="formula-label">Damped Frequency</span>
-                        Ï‰d = Ï‰nâˆš(1 âˆ’ Î¶Â²)
+                        ωd = ωn√(1 − ζ²)
                     </div>
                 </div>
             </div>
@@ -119,23 +119,23 @@
                 <div class="metrics-row">
                     <div class="metric-card">
                         <div class="metric-label">Rise Time</div>
-                        <div class="metric-value" id="metric-rise">â€” s</div>
+                        <div class="metric-value" id="metric-rise">— s</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Overshoot</div>
-                        <div class="metric-value" id="metric-overshoot">â€” %</div>
+                        <div class="metric-value" id="metric-overshoot">— %</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Peak Time</div>
-                        <div class="metric-value" id="metric-peak-time">â€” s</div>
+                        <div class="metric-value" id="metric-peak-time">— s</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Settling Time (2%)</div>
-                        <div class="metric-value" id="metric-settling">â€” s</div>
+                        <div class="metric-value" id="metric-settling">— s</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Damped Freq</div>
-                        <div class="metric-value" id="metric-wd">â€” rad/s</div>
+                        <div class="metric-value" id="metric-wd">— rad/s</div>
                     </div>
                 </div>
             </div>
@@ -149,31 +149,31 @@
                     <h3>Model</h3>
                     <div class="equation">
                         <span class="eq-label">Transfer function</span>
-                        G(s) = Ï‰<sub>n</sub>Â² / (sÂ² + 2Î¶Ï‰<sub>n</sub>s + Ï‰<sub>n</sub>Â²)
-                        <span class="eq-note">Î¶ â€” damping ratio Â· Ï‰<sub>n</sub> â€” natural frequency (rad/s).</span>
+                        G(s) = ω<sub>n</sub>² / (s² + 2ζω<sub>n</sub>s + ω<sub>n</sub>²)
+                        <span class="eq-note">ζ — damping ratio · ω<sub>n</sub> — natural frequency (rad/s).</span>
                     </div>
                     <div class="equation">
                         <span class="eq-label">Poles</span>
-                        s<sub>1,2</sub> = âˆ’Î¶Ï‰<sub>n</sub> Â± Ï‰<sub>n</sub>âˆš(Î¶Â² âˆ’ 1)
-                        <span class="eq-note">Underdamped â†’ complex pair Â· critically damped â†’ double real Â· overdamped â†’ two real.</span>
+                        s<sub>1,2</sub> = −ζω<sub>n</sub> ± ω<sub>n</sub>√(ζ² − 1)
+                        <span class="eq-note">Underdamped → complex pair · critically damped → double real · overdamped → two real.</span>
                     </div>
                 </div>
 
                 <div class="docs-card">
                     <h3>Step Response (unit step)</h3>
                     <div class="equation">
-                        <span class="eq-label">Underdamped (Î¶ &lt; 1)</span>
-                        Ï‰<sub>d</sub> = Ï‰<sub>n</sub>âˆš(1 âˆ’ Î¶Â²)<br>
-                        y(t) = 1 âˆ’ (e<sup>âˆ’Î¶Ï‰<sub>n</sub>t</sup>/âˆš(1 âˆ’ Î¶Â²)) Â· sin(Ï‰<sub>d</sub>t + Ï†)
-                        <span class="eq-note">Ï† = atan2(Î¶, âˆš(1 âˆ’ Î¶Â²))</span>
+                        <span class="eq-label">Underdamped (ζ &lt; 1)</span>
+                        ω<sub>d</sub> = ω<sub>n</sub>√(1 − ζ²)<br>
+                        y(t) = 1 − (e<sup>−ζω<sub>n</sub>t</sup>/√(1 − ζ²)) · sin(ω<sub>d</sub>t + φ)
+                        <span class="eq-note">φ = atan2(ζ, √(1 − ζ²))</span>
                     </div>
                     <div class="equation">
-                        <span class="eq-label">Critically damped (Î¶ = 1)</span>
-                        y(t) = 1 âˆ’ (1 + Ï‰<sub>n</sub>t)Â·e<sup>âˆ’Ï‰<sub>n</sub>t</sup>
+                        <span class="eq-label">Critically damped (ζ = 1)</span>
+                        y(t) = 1 − (1 + ω<sub>n</sub>t)·e<sup>−ω<sub>n</sub>t</sup>
                     </div>
                     <div class="equation">
-                        <span class="eq-label">Overdamped (Î¶ &gt; 1)</span>
-                        y(t) = 1 + (s<sub>1</sub>e<sup>s<sub>2</sub>t</sup> âˆ’ s<sub>2</sub>e<sup>s<sub>1</sub>t</sup>)/(s<sub>2</sub> âˆ’ s<sub>1</sub>)
+                        <span class="eq-label">Overdamped (ζ &gt; 1)</span>
+                        y(t) = 1 + (s<sub>1</sub>e<sup>s<sub>2</sub>t</sup> − s<sub>2</sub>e<sup>s<sub>1</sub>t</sup>)/(s<sub>2</sub> − s<sub>1</sub>)
                     </div>
                 </div>
 
@@ -181,21 +181,21 @@
                     <h3>Parameters</h3>
                     <table class="param-table">
                         <tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr>
-                        <tr><td class="sym">Î¶</td><td>Damping ratio (Î¶&lt;1 under, =1 critical, &gt;1 over)</td><td class="def">0.30</td></tr>
-                        <tr><td class="sym">Ï‰<sub>n</sub></td><td>Natural frequency (rad/s)</td><td class="def">2.0</td></tr>
-                        <tr><td class="sym">Ï‰<sub>d</sub></td><td>Damped frequency = Ï‰<sub>n</sub>âˆš(1âˆ’Î¶Â²)</td><td class="def">derived</td></tr>
+                        <tr><td class="sym">ζ</td><td>Damping ratio (ζ&lt;1 under, =1 critical, &gt;1 over)</td><td class="def">0.30</td></tr>
+                        <tr><td class="sym">ω<sub>n</sub></td><td>Natural frequency (rad/s)</td><td class="def">2.0</td></tr>
+                        <tr><td class="sym">ω<sub>d</sub></td><td>Damped frequency = ω<sub>n</sub>√(1−ζ²)</td><td class="def">derived</td></tr>
                     </table>
                 </div>
 
                 <div class="docs-card">
                     <h3>Performance Metrics</h3>
                     <div class="equation">
-                        <span class="eq-label">Closed-form indicators (Î¶ &lt; 1)</span>
-                        Overshoot = 100Â·e<sup>âˆ’Ï€Î¶/âˆš(1âˆ’Î¶Â²)</sup> %<br>
-                        Peak time t<sub>p</sub> = Ï€ / Ï‰<sub>d</sub><br>
-                        Rise time t<sub>r</sub> â‰ˆ (Ï€ âˆ’ Ï†) / Ï‰<sub>d</sub><br>
-                        Settling (2%) t<sub>s</sub> â‰ˆ 4 / (Î¶Ï‰<sub>n</sub>)
-                        <span class="eq-note">Higher Î¶ â†’ less overshoot but slower; higher Ï‰<sub>n</sub> â†’ faster.</span>
+                        <span class="eq-label">Closed-form indicators (ζ &lt; 1)</span>
+                        Overshoot = 100·e<sup>−πζ/√(1−ζ²)</sup> %<br>
+                        Peak time t<sub>p</sub> = π / ω<sub>d</sub><br>
+                        Rise time t<sub>r</sub> ≈ (π − φ) / ω<sub>d</sub><br>
+                        Settling (2%) t<sub>s</sub> ≈ 4 / (ζω<sub>n</sub>)
+                        <span class="eq-note">Higher ζ → less overshoot but slower; higher ω<sub>n</sub> → faster.</span>
                     </div>
                 </div>
             </div>
